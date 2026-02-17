@@ -296,6 +296,27 @@ export class HybridStorage implements IStorage {
     incrementDbQuery();
     const passwordHash = await hashPassword(password);
     await userQueries.createUser(userName, passwordHash, 'user');
+
+    // 同时更新 admin_config 中的 Users 列表
+    const config = await this.getAdminConfig();
+    if (config) {
+      const userExists = config.UserConfig.Users.find(
+        (u) => u.username === userName,
+      );
+      if (!userExists) {
+        config.UserConfig.Users.push({
+          username: userName,
+          password: '',
+          role: 'user',
+          banned: 0,
+          tags: undefined,
+          enabledApis: undefined,
+          oidcSub: undefined,
+          createdAt: Date.now(),
+        });
+        await this.setAdminConfig(config);
+      }
+    }
   }
 
   async verifyUser(userName: string, password: string): Promise<boolean> {
@@ -894,6 +915,10 @@ export class HybridStorage implements IStorage {
       isExpiring,
       isExpired,
     };
+  }
+
+  async getFullUserCardKey(userName: string): Promise<UserCardKeyInfo | null> {
+    return this.getUserCardKey(userName);
   }
 
   // ==================== 积分系统 ====================
