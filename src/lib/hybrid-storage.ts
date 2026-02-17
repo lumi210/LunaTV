@@ -151,12 +151,24 @@ export class HybridStorage implements IStorage {
     return record;
   }
 
+  async ensureUserExists(userName: string): Promise<void> {
+    const exists = await userQueries.checkUserExists(userName);
+    if (!exists) {
+      const ownerUser = process.env.USERNAME;
+      const role = userName === ownerUser ? 'owner' : 'user';
+      await userQueries.createUser(userName, '', role);
+      console.log(`[HybridStorage] 自动创建用户: ${userName}`);
+    }
+  }
+
   async setPlayRecord(
     userName: string,
     key: string,
     record: PlayRecord,
   ): Promise<void> {
     incrementDbQuery();
+
+    await this.ensureUserExists(userName);
 
     const [source, id] = key.split('+');
     await playRecordQueries.upsertPlayRecord(userName, source, id, record);
@@ -227,6 +239,8 @@ export class HybridStorage implements IStorage {
     favorite: Favorite,
   ): Promise<void> {
     incrementDbQuery();
+
+    await this.ensureUserExists(userName);
 
     const [source, id] = key.split('+');
     await favoriteQueries.upsertFavorite(userName, source, id, favorite);

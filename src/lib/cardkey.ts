@@ -178,7 +178,40 @@ export class CardKeyService {
       boundAt: Date.now(),
     });
 
-    // 更新用户卡密信息
+    // 生成用户卡密记录 ID
+    const userCardKeyId = this.generateUUID();
+
+    // 创建用户卡密记录（用于 getUserCardKey 查询）
+    const userCardKey: import('./types').UserCardKey = {
+      id: userCardKeyId,
+      keyHash: hashedKey,
+      username: username,
+      type: validation.cardKey!.keyType,
+      status: 'used',
+      source: 'redeem',
+      createdAt: Date.now(),
+      expiresAt: newExpiresAt,
+    };
+
+    // 检查是否已有用户卡密记录，如果有则更新
+    const existingUserCardKeys = await db.getUserCardKeys(username);
+    const existingActive = existingUserCardKeys.find(
+      (k) => k.status === 'used' && k.expiresAt > Date.now(),
+    );
+
+    if (existingActive) {
+      // 更新现有记录的过期时间
+      await db.updateUserCardKey(existingActive.id, {
+        expiresAt: newExpiresAt,
+      });
+      console.log('更新用户卡密记录过期时间:', existingActive.id);
+    } else {
+      // 创建新的用户卡密记录
+      await db.addUserCardKey(userCardKey);
+      console.log('创建用户卡密记录:', userCardKeyId);
+    }
+
+    // 更新用户卡密信息（admin_configs）
     const userCardKeyInfo: import('./admin.types').UserCardKeyData = {
       boundKey: hashedKey,
       expiresAt: newExpiresAt,
@@ -275,6 +308,15 @@ export class CardKeyService {
     const days = CARD_KEY_DURATION[type];
     const msPerDay = 1000 * 60 * 60 * 24;
     return Date.now() + days * msPerDay;
+  }
+
+  // 生成 UUID
+  generateUUID(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
   }
 
   // 生成随机卡密（明文）
