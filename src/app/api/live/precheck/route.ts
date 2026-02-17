@@ -116,7 +116,8 @@ async function sniffTypeFromBody(response: Response): Promise<StreamType> {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const url = searchParams.get('url');
-  const source = searchParams.get('moontv-source') || searchParams.get('decotv-source');
+  const source =
+    searchParams.get('moontv-source') || searchParams.get('decotv-source');
 
   if (!url) {
     return NextResponse.json({ error: 'Missing url' }, { status: 400 });

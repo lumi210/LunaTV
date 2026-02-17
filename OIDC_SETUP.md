@@ -38,11 +38,13 @@ OpenID Connect (OIDC) 是基于 OAuth 2.0 协议的身份认证层，允许用�
 所有 OIDC 提供商都需要配置回调 URL（Redirect URI / Callback URL）。
 
 **LunaTV 的标准回调 URL 格式**：
+
 ```
 https://your-domain.com/api/auth/oidc/callback
 ```
 
 示例：
+
 - 生产环境：`https://lunatv.example.com/api/auth/oidc/callback`
 - 本地开发：`http://localhost:3000/api/auth/oidc/callback`
 
@@ -100,10 +102,12 @@ https://your-domain.com/api/auth/oidc/callback
 ### 步骤 4：获取凭据
 
 创建成功后，会弹出窗口显示：
+
 - **客户端 ID**：`xxxxxx.apps.googleusercontent.com`
 - **客户端密钥**：`GOCSPX-xxxxxxxxxx`
 
 ⚠️ **重要提示（2025 年更新）**：
+
 - 从 2025 年 6 月起，新创建的客户端密钥只在创建时可见
 - 务必立即复制并妥善保存客户端密钥
 - 如果遗失，需要重新生成新的密钥
@@ -117,6 +121,7 @@ Issuer URL: https://accounts.google.com
 ```
 
 **自动发现端点**：
+
 ```
 https://accounts.google.com/.well-known/openid-configuration
 ```
@@ -130,6 +135,7 @@ UserInfo Endpoint:      https://openidconnect.googleapis.com/v1/userinfo
 ```
 
 ### 参考资料
+
 - [Setting up OAuth 2.0 - Google Cloud Console Help](https://support.google.com/cloud/answer/6158849?hl=en)
 - [OpenID Connect | Sign in with Google](https://developers.google.com/identity/openid-connect/openid-connect)
 - [Get your Google API client ID](https://developers.google.com/identity/oauth2/web/guides/get-google-api-clientid)
@@ -182,11 +188,13 @@ Microsoft Entra ID（前身为 Azure Active Directory）提供企业级身份认
 2. 复制以下端点 URL：
 
 **对于单租户应用**：
+
 ```
 Issuer URL: https://login.microsoftonline.com/{tenant-id}/v2.0
 ```
 
 **对于多租户应用**（推荐）：
+
 ```
 Issuer URL: https://login.microsoftonline.com/common/v2.0
 ```
@@ -194,6 +202,7 @@ Issuer URL: https://login.microsoftonline.com/common/v2.0
 其中 `{tenant-id}` 可在应用概述页面的 **目录(租户) ID** 中找到。
 
 **自动发现端点**：
+
 ```
 https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration
 ```
@@ -207,6 +216,7 @@ UserInfo Endpoint:      https://graph.microsoft.com/oidc/userinfo
 ```
 
 ### 参考资料
+
 - [OpenID Connect (OIDC) on the Microsoft identity platform](https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc)
 - [How to register an app in Microsoft Entra ID](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
 - [Microsoft identity platform UserInfo endpoint](https://learn.microsoft.com/en-us/entra/identity-platform/userinfo)
@@ -238,6 +248,7 @@ GitHub 提供 OAuth 2.0 认证（虽然不是完整的 OIDC，但兼容大部分
 3. **立即复制并保存 Client Secret**（仅显示一次）
 
 ⚠️ **安全提示**：
+
 - Client Secret 不要公开或提交到代码仓库
 - 如果泄露，请立即在 GitHub 重新生成新密钥
 
@@ -252,6 +263,7 @@ UserInfo Endpoint:      https://api.github.com/user
 ```
 
 **特殊说明**：
+
 - GitHub OAuth 不完全符合 OIDC 标准，没有 Issuer URL
 - 需要在 LunaTV 后台**手动配置**各端点 URL
 - UserInfo 端点返回的是 GitHub API 用户信息格式
@@ -260,13 +272,13 @@ UserInfo Endpoint:      https://api.github.com/user
 
 #### GitHub OAuth 的特殊性
 
-| 特性 | 标准 OIDC | GitHub OAuth | LunaTV 处理 |
-|------|-----------|--------------|-------------|
-| **OAuth Scope** | `openid profile email` | `read:user user:email` | ✅ 自动使用 GitHub scope |
-| **Token 响应格式** | JSON | URL编码（默认） | ✅ 添加 Accept header 获取 JSON |
-| **id_token** | 返回 | ❌ 不返回 | ✅ 使用 access_token |
-| **Email 可见性** | 公开 | 可能为 null（私有） | ✅ 自动从 `/user/emails` 获取 |
-| **UserInfo Headers** | 标准 Authorization | 需要 GitHub API headers | ✅ 添加专用 headers |
+| 特性                 | 标准 OIDC              | GitHub OAuth            | LunaTV 处理                     |
+| -------------------- | ---------------------- | ----------------------- | ------------------------------- |
+| **OAuth Scope**      | `openid profile email` | `read:user user:email`  | ✅ 自动使用 GitHub scope        |
+| **Token 响应格式**   | JSON                   | URL编码（默认）         | ✅ 添加 Accept header 获取 JSON |
+| **id_token**         | 返回                   | ❌ 不返回               | ✅ 使用 access_token            |
+| **Email 可见性**     | 公开                   | 可能为 null（私有）     | ✅ 自动从 `/user/emails` 获取   |
+| **UserInfo Headers** | 标准 Authorization     | 需要 GitHub API headers | ✅ 添加专用 headers             |
 
 #### LunaTV 的适配处理
 
@@ -293,6 +305,7 @@ UserInfo Endpoint:      https://api.github.com/user
 #### 获取的用户信息
 
 LunaTV 从 GitHub API 获取：
+
 - `id`：用户唯一标识符（用于关联账号）
 - `login`：GitHub 用户名
 - `name`：用户显示名称
@@ -302,6 +315,7 @@ LunaTV 从 GitHub API 获取：
 > 📝 **隐私说明**：如果用户未公开邮箱，LunaTV 会自动从 `/user/emails` 端点获取 primary verified email（需要 `user:email` scope）。
 
 ### 参考资料
+
 - [Creating an OAuth app - GitHub Docs](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app)
 - [Authorizing OAuth apps - GitHub Docs](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps)
 - [Setting up Github OAuth 2.0](https://apidog.com/blog/set-up-github-oauth2/)
@@ -343,6 +357,7 @@ Facebook 提供 OAuth 2.0 认证服务，拥有全球最大的用户基数。Lun
    - **App Secret**（应用密钥）- 点击 **"Show"**（显示）按钮查看，这就是您的 **Client Secret**
 
 > ⚠️ **重要提示**：
+>
 > - App Secret 类似于密码，切勿公开或提交到代码仓库
 > - 创建后请立即复制并妥善保管
 > - 如果泄露，请立即在 Facebook 后台重新生成新密钥
@@ -358,6 +373,7 @@ Facebook 提供 OAuth 2.0 认证服务，拥有全球最大的用户基数。Lun
 1. 在左侧菜单中点击 **"Facebook Login"** → **"Settings"**（设置）
 2. 找到 **"Valid OAuth Redirect URIs"**（有效的 OAuth 重定向 URI）
 3. 添加您的回调地址：
+
    ```
    https://your-domain.com/api/auth/oidc/callback
    ```
@@ -394,6 +410,7 @@ UserInfo Endpoint:      https://graph.facebook.com/v24.0/me
 ```
 
 **版本说明**：
+
 - 当前示例使用 `v24.0`（2025 年最新版本）
 - Facebook 会定期发布新版本，可访问 [Graph API 版本文档](https://developers.facebook.com/docs/graph-api/changelog) 查看最新版本
 - 旧版本会在发布后至少 2 年内保持可用
@@ -404,18 +421,18 @@ UserInfo Endpoint:      https://graph.facebook.com/v24.0/me
 
 #### 点击 **"添加 Provider"**，填写以下信息：
 
-| 字段 | 值 | 说明 |
-|------|-----|------|
-| **Provider ID** | `facebook` | ⚠️ **必须**填写 `facebook`（全部小写）才能显示 Facebook logo |
-| **启用** | ✅ 勾选 | 启用此 Provider |
-| **按钮文字** | `使用 Facebook 登录` | 可选，留空则使用默认文字 |
-| **允许注册** | ✅ 勾选（可选） | 是否允许新用户通过 Facebook 注册 |
-| **Issuer URL** | `https://www.facebook.com` | Facebook 的 Issuer |
-| **Authorization Endpoint** | `https://www.facebook.com/v24.0/dialog/oauth` | 授权端点 |
-| **Token Endpoint** | `https://graph.facebook.com/v24.0/oauth/access_token` | Token 端点 |
-| **UserInfo Endpoint** | `https://graph.facebook.com/v24.0/me` | 用户信息端点 |
-| **Client ID** | `您的 App ID` | 从 Facebook 应用设置中获取 |
-| **Client Secret** | `您的 App Secret` | 从 Facebook 应用设置中获取 |
+| 字段                       | 值                                                    | 说明                                                         |
+| -------------------------- | ----------------------------------------------------- | ------------------------------------------------------------ |
+| **Provider ID**            | `facebook`                                            | ⚠️ **必须**填写 `facebook`（全部小写）才能显示 Facebook logo |
+| **启用**                   | ✅ 勾选                                               | 启用此 Provider                                              |
+| **按钮文字**               | `使用 Facebook 登录`                                  | 可选，留空则使用默认文字                                     |
+| **允许注册**               | ✅ 勾选（可选）                                       | 是否允许新用户通过 Facebook 注册                             |
+| **Issuer URL**             | `https://www.facebook.com`                            | Facebook 的 Issuer                                           |
+| **Authorization Endpoint** | `https://www.facebook.com/v24.0/dialog/oauth`         | 授权端点                                                     |
+| **Token Endpoint**         | `https://graph.facebook.com/v24.0/oauth/access_token` | Token 端点                                                   |
+| **UserInfo Endpoint**      | `https://graph.facebook.com/v24.0/me`                 | 用户信息端点                                                 |
+| **Client ID**              | `您的 App ID`                                         | 从 Facebook 应用设置中获取                                   |
+| **Client Secret**          | `您的 App Secret`                                     | 从 Facebook 应用设置中获取                                   |
 
 #### 完整配置示例
 
@@ -442,15 +459,16 @@ UserInfo Endpoint:      https://graph.facebook.com/v24.0/me
 
 Facebook 使用 OAuth 2.0 协议，与标准 OIDC 有以下差异（LunaTV 已自动处理）：
 
-| 差异项 | 标准 OIDC | Facebook OAuth | LunaTV 处理 |
-|--------|-----------|----------------|-------------|
-| **用户唯一标识** | `sub` 字段 | `id` 字段 | ✅ 自动兼容 |
-| **ID Token** | 返回 `id_token` | 不一定返回 | ✅ 已适配 |
+| 差异项            | 标准 OIDC        | Facebook OAuth         | LunaTV 处理 |
+| ----------------- | ---------------- | ---------------------- | ----------- |
+| **用户唯一标识**  | `sub` 字段       | `id` 字段              | ✅ 自动兼容 |
+| **ID Token**      | 返回 `id_token`  | 不一定返回             | ✅ 已适配   |
 | **UserInfo 字段** | 自动返回基础字段 | 需要 `fields` 参数指定 | ✅ 自动添加 |
 
 #### 获取的用户信息
 
 LunaTV 从 Facebook 获取以下字段：
+
 - `id`：用户唯一标识符（用于关联账号）
 - `name`：用户姓名
 - `email`：邮箱地址（如果用户授权分享）
@@ -465,6 +483,7 @@ LunaTV 从 Facebook 获取以下字段：
 **原因**：重定向 URI 配置不匹配
 
 **解决方法**：
+
 1. 检查 Facebook 应用中配置的 **"Valid OAuth Redirect URIs"** 是否与您的实际域名一致
 2. 确保使用 `https://` 协议
 3. 确保路径为 `/api/auth/oidc/callback`（无额外斜杠）
@@ -475,6 +494,7 @@ LunaTV 从 Facebook 获取以下字段：
 **原因**：Facebook 应用未正确配置 Facebook Login 产品
 
 **解决方法**：
+
 1. 确保已在 Facebook 应用中添加 **"Facebook Login"** 产品
 2. 检查 OAuth 重定向 URI 是否已保存
 3. 确认应用已切换到 **"Live"** 模式（如果要给其他用户使用）
@@ -484,6 +504,7 @@ LunaTV 从 Facebook 获取以下字段：
 **原因**：Provider ID 配置错误
 
 **解决方法**：
+
 1. 检查 LunaTV 配置中的 **"Provider ID"** 字段
 2. **必须**填写 `facebook`（全部小写，不能是 `Facebook` 或 `fb`）
 3. 保存配置后刷新登录页面
@@ -493,6 +514,7 @@ LunaTV 从 Facebook 获取以下字段：
 **原因**：UserInfo Endpoint 配置错误或权限问题
 
 **解决方法**：
+
 1. 确认 **"UserInfo Endpoint"** 配置为 `https://graph.facebook.com/v19.0/me`
 2. 查看服务器日志获取详细错误信息
 3. 检查 App ID 和 App Secret 是否正确
@@ -516,6 +538,7 @@ ngrok http 3000
 #### Q6: Facebook 登录后获取不到邮箱？
 
 **说明**：
+
 - Facebook 用户可以选择不分享邮箱
 - LunaTV 使用 Facebook 的唯一 ID（`id` 字段）作为用户标识，不强制要求邮箱
 - 如果需要邮箱，可以在首次注册时要求用户补充
@@ -532,6 +555,7 @@ ngrok http 3000
    ```
 
 ### 参考资料
+
 - [Facebook for Developers 官方文档](https://developers.facebook.com/docs/)
 - [Facebook Login 文档](https://developers.facebook.com/docs/facebook-login/)
 - [Facebook Graph API 文档](https://developers.facebook.com/docs/graph-api/)
@@ -562,9 +586,11 @@ ngrok http 3000
    - **应用官网**：`https://your-domain.com`
    - **应用图标**：上传应用图标（108×108 像素）
 4. 填写 **授权回调域**：
+
    ```
    your-domain.com
    ```
+
    ⚠️ **重要**：只填写域名，不要加 `https://` 或路径
 
 5. 提交审核，等待微信团队审核（通常 1-7 个工作日）
@@ -592,6 +618,7 @@ UserInfo Endpoint:      https://api.weixin.qq.com/sns/userinfo
 ```
 
 **特殊说明**：
+
 - 微信使用 `appid` 和 `secret` 参数，而不是标准的 `client_id` 和 `client_secret`
 - Scope 使用 `snsapi_login`（网站应用扫码登录）
 - LunaTV 已自动处理这些差异
@@ -602,18 +629,18 @@ UserInfo Endpoint:      https://api.weixin.qq.com/sns/userinfo
 
 #### 点击 **"添加 Provider"**，填写以下信息：
 
-| 字段 | 值 | 说明 |
-|------|-----|------|
-| **Provider ID** | `wechat` | ⚠️ **必须**填写 `wechat`（全部小写）才能显示微信 logo |
-| **启用** | ✅ 勾选 | 启用此 Provider |
-| **按钮文字** | `使用微信登录` | 可选，留空则使用默认文字 |
-| **允许注册** | ✅ 勾选（可选） | 是否允许新用户通过微信注册 |
-| **Issuer URL** | `https://open.weixin.qq.com` | 微信开放平台地址 |
-| **Authorization Endpoint** | `https://open.weixin.qq.com/connect/qrconnect` | 扫码授权端点 |
-| **Token Endpoint** | `https://api.weixin.qq.com/sns/oauth2/access_token` | Token 端点 |
-| **UserInfo Endpoint** | `https://api.weixin.qq.com/sns/userinfo` | 用户信息端点 |
-| **Client ID** | `您的 AppID` | 从微信开放平台获取 |
-| **Client Secret** | `您的 AppSecret` | 从微信开放平台获取 |
+| 字段                       | 值                                                  | 说明                                                  |
+| -------------------------- | --------------------------------------------------- | ----------------------------------------------------- |
+| **Provider ID**            | `wechat`                                            | ⚠️ **必须**填写 `wechat`（全部小写）才能显示微信 logo |
+| **启用**                   | ✅ 勾选                                             | 启用此 Provider                                       |
+| **按钮文字**               | `使用微信登录`                                      | 可选，留空则使用默认文字                              |
+| **允许注册**               | ✅ 勾选（可选）                                     | 是否允许新用户通过微信注册                            |
+| **Issuer URL**             | `https://open.weixin.qq.com`                        | 微信开放平台地址                                      |
+| **Authorization Endpoint** | `https://open.weixin.qq.com/connect/qrconnect`      | 扫码授权端点                                          |
+| **Token Endpoint**         | `https://api.weixin.qq.com/sns/oauth2/access_token` | Token 端点                                            |
+| **UserInfo Endpoint**      | `https://api.weixin.qq.com/sns/userinfo`            | 用户信息端点                                          |
+| **Client ID**              | `您的 AppID`                                        | 从微信开放平台获取                                    |
+| **Client Secret**          | `您的 AppSecret`                                    | 从微信开放平台获取                                    |
 
 #### 完整配置示例
 
@@ -640,17 +667,18 @@ UserInfo Endpoint:      https://api.weixin.qq.com/sns/userinfo
 
 微信使用 OAuth 2.0 协议，与标准 OIDC 有以下差异（LunaTV 已自动处理）：
 
-| 差异项 | 标准 OIDC | 微信 OAuth | LunaTV 处理 |
-|--------|-----------|------------|-------------|
-| **Client ID 参数名** | `client_id` | `appid` | ✅ 自动转换 |
-| **Client Secret 参数名** | `client_secret` | `secret` | ✅ 自动转换 |
-| **Scope** | `openid profile email` | `snsapi_login` | ✅ 自动设置 |
-| **用户唯一标识** | `sub` 字段 | `openid` 字段 | ✅ 自动兼容 |
-| **UserInfo 参数** | Bearer Token | URL 参数 `access_token` + `openid` | ✅ 自动添加 |
+| 差异项                   | 标准 OIDC              | 微信 OAuth                         | LunaTV 处理 |
+| ------------------------ | ---------------------- | ---------------------------------- | ----------- |
+| **Client ID 参数名**     | `client_id`            | `appid`                            | ✅ 自动转换 |
+| **Client Secret 参数名** | `client_secret`        | `secret`                           | ✅ 自动转换 |
+| **Scope**                | `openid profile email` | `snsapi_login`                     | ✅ 自动设置 |
+| **用户唯一标识**         | `sub` 字段             | `openid` 字段                      | ✅ 自动兼容 |
+| **UserInfo 参数**        | Bearer Token           | URL 参数 `access_token` + `openid` | ✅ 自动添加 |
 
 #### 获取的用户信息
 
 LunaTV 从微信获取以下字段：
+
 - `openid`：用户唯一标识符（用于关联账号）
 - `nickname`：用户昵称
 - `headimgurl`：用户头像 URL
@@ -666,6 +694,7 @@ LunaTV 从微信获取以下字段：
 **原因**：授权回调域配置不正确
 
 **解决方法**：
+
 1. 检查微信开放平台应用设置中的 **授权回调域**
 2. 只填写域名（如 `lunatv.example.com`），不要加协议或路径
 3. 确保域名与实际访问域名完全一致
@@ -675,6 +704,7 @@ LunaTV 从微信获取以下字段：
 **原因**：应用处于开发模式
 
 **解决方法**：
+
 1. 进入微信开放平台 → 管理中心 → 网站应用
 2. 找到你的应用，确认审核状态为 **"审核通过"**
 3. 开发阶段可以使用微信开放平台的测试账号功能
@@ -684,6 +714,7 @@ LunaTV 从微信获取以下字段：
 **原因**：Provider ID 配置错误
 
 **解决方法**：
+
 1. 检查 LunaTV 配置中的 **"Provider ID"** 字段
 2. **必须**填写 `wechat`（全部小写，不能是 `WeChat` 或 `weixin`）
 3. 保存配置后刷新登录页面
@@ -712,6 +743,7 @@ LunaTV 从微信获取以下字段：
 #### Q5: 微信认证费用是否必须？
 
 **回答**：
+
 - 个人开发者：可以申请个人开发者认证（免费），但功能受限
 - 企业应用：需要企业认证（300元/年），功能完整
 - 测试阶段：可以使用微信提供的测试号进行开发调试
@@ -780,6 +812,7 @@ Apple Sign In 提供安全、隐私友好的登录方式，支持所有苹果设
 7. 记录 **Key ID**（10 位字符）
 
 > ⚠️ **重要**：
+>
 > - .p8 私钥文件只能下载一次，请妥善保管
 > - 记录你的 **Team ID**（在账号页面右上角）
 
@@ -812,7 +845,7 @@ const token = jwt.sign({}, privateKey, {
   audience: 'https://appleid.apple.com',
   issuer: 'YOUR_TEAM_ID', // 你的 Team ID
   subject: 'com.yourcompany.lunatv.web', // 你的 Services ID
-  keyid: 'YOUR_KEY_ID' // 你的 Key ID
+  keyid: 'YOUR_KEY_ID', // 你的 Key ID
 });
 
 console.log(token);
@@ -837,6 +870,7 @@ JWKS Endpoint:          https://appleid.apple.com/auth/keys
 ```
 
 **特殊说明**：
+
 - Apple **没有 UserInfo Endpoint**
 - 用户信息在 `id_token`（JWT）中返回
 - 用户信息（姓名、邮箱）**只在首次授权时**返回
@@ -848,18 +882,18 @@ JWKS Endpoint:          https://appleid.apple.com/auth/keys
 
 #### 点击 **"添加 Provider"**，填写以下信息：
 
-| 字段 | 值 | 说明 |
-|------|-----|------|
-| **Provider ID** | `apple` | ⚠️ **必须**填写 `apple`（全部小写）才能显示 Apple logo |
-| **启用** | ✅ 勾选 | 启用此 Provider |
-| **按钮文字** | `使用 Apple 登录` | 可选，留空则使用默认文字 |
-| **允许注册** | ✅ 勾选（可选） | 是否允许新用户通过 Apple 注册 |
-| **Issuer URL** | `https://appleid.apple.com` | Apple 的 Issuer（支持自动发现） |
-| **Authorization Endpoint** | `https://appleid.apple.com/auth/authorize` | 授权端点（自动发现会填充） |
-| **Token Endpoint** | `https://appleid.apple.com/auth/token` | Token 端点（自动发现会填充） |
-| **JWKS URI** | `https://appleid.apple.com/auth/keys` | 用于验证 id_token 签名（自动发现会填充） |
-| **Client ID** | `com.yourcompany.lunatv.web` | 你的 Services ID |
-| **Client Secret** | `eyJhbGc...` | 生成的 JWT（很长的字符串） |
+| 字段                       | 值                                         | 说明                                                   |
+| -------------------------- | ------------------------------------------ | ------------------------------------------------------ |
+| **Provider ID**            | `apple`                                    | ⚠️ **必须**填写 `apple`（全部小写）才能显示 Apple logo |
+| **启用**                   | ✅ 勾选                                    | 启用此 Provider                                        |
+| **按钮文字**               | `使用 Apple 登录`                          | 可选，留空则使用默认文字                               |
+| **允许注册**               | ✅ 勾选（可选）                            | 是否允许新用户通过 Apple 注册                          |
+| **Issuer URL**             | `https://appleid.apple.com`                | Apple 的 Issuer（支持自动发现）                        |
+| **Authorization Endpoint** | `https://appleid.apple.com/auth/authorize` | 授权端点（自动发现会填充）                             |
+| **Token Endpoint**         | `https://appleid.apple.com/auth/token`     | Token 端点（自动发现会填充）                           |
+| **JWKS URI**               | `https://appleid.apple.com/auth/keys`      | 用于验证 id_token 签名（自动发现会填充）               |
+| **Client ID**              | `com.yourcompany.lunatv.web`               | 你的 Services ID                                       |
+| **Client Secret**          | `eyJhbGc...`                               | 生成的 JWT（很长的字符串）                             |
 
 #### 完整配置示例
 
@@ -885,14 +919,14 @@ JWKS Endpoint:          https://appleid.apple.com/auth/keys
 
 #### Apple Sign In 的特殊性
 
-| 特性 | 标准 OIDC | Apple Sign In | LunaTV 处理 |
-|------|-----------|---------------|-------------|
-| **Client Secret** | 静态字符串 | 动态生成的 JWT（6个月有效期） | ✅ 支持 JWT |
-| **UserInfo Endpoint** | 提供 | ❌ 不提供 | ✅ 从 id_token 解析 |
-| **JWKS URI** | 可选 | ✅ 提供（验证签名） | ✅ 支持配置 |
-| **响应模式** | Query params（GET） | form_post（POST） | ✅ 支持 POST handler |
-| **用户信息返回** | 每次都返回 | 只在首次授权时返回 | ✅ 自动处理 |
-| **Email 隐藏** | 真实邮箱 | 可选择隐藏（relay邮箱） | ✅ 支持 |
+| 特性                  | 标准 OIDC           | Apple Sign In                 | LunaTV 处理          |
+| --------------------- | ------------------- | ----------------------------- | -------------------- |
+| **Client Secret**     | 静态字符串          | 动态生成的 JWT（6个月有效期） | ✅ 支持 JWT          |
+| **UserInfo Endpoint** | 提供                | ❌ 不提供                     | ✅ 从 id_token 解析  |
+| **JWKS URI**          | 可选                | ✅ 提供（验证签名）           | ✅ 支持配置          |
+| **响应模式**          | Query params（GET） | form_post（POST）             | ✅ 支持 POST handler |
+| **用户信息返回**      | 每次都返回          | 只在首次授权时返回            | ✅ 自动处理          |
+| **Email 隐藏**        | 真实邮箱            | 可选择隐藏（relay邮箱）       | ✅ 支持              |
 
 #### LunaTV 的适配处理
 
@@ -919,6 +953,7 @@ JWKS Endpoint:          https://appleid.apple.com/auth/keys
 #### 获取的用户信息
 
 LunaTV 从 Apple id_token 中获取：
+
 - `sub`：用户唯一标识符（用于关联账号）
 - `email`：邮箱地址（可能是中继邮箱）
 - `email_verified`：邮箱是否已验证（通常为 true）
@@ -930,6 +965,7 @@ LunaTV 从 Apple id_token 中获取：
 #### Q1: Client Secret 过期怎么办？
 
 **回答**：
+
 - Client Secret（JWT）最长有效期 6 个月
 - 到期前，使用相同的私钥重新生成 JWT
 - 在 LunaTV 管理后台更新 Client Secret
@@ -962,6 +998,7 @@ LunaTV 从 Apple id_token 中获取：
 **原因**：Client Secret（JWT）无效或过期
 
 **解决方法**：
+
 1. 检查 JWT 是否正确生成（Team ID、Client ID、Key ID 是否正确）
 2. 检查 JWT 是否过期
 3. 重新生成 Client Secret 并更新配置
@@ -969,10 +1006,12 @@ LunaTV 从 Apple id_token 中获取：
 #### Q4: 登录后获取不到邮箱？
 
 **原因**：
+
 - 用户首次登录时选择了隐藏邮箱
 - 或者用户使用的是中继邮箱
 
 **说明**：
+
 - Apple 允许用户隐藏真实邮箱
 - LunaTV 使用 `sub` 字段作为唯一标识，不强制要求邮箱
 - 如果需要邮箱，可以在首次注册时要求用户补充
@@ -980,6 +1019,7 @@ LunaTV 从 Apple id_token 中获取：
 #### Q5: 如何测试首次登录流程？
 
 **方法**：
+
 1. 在 Apple ID 账户页面 [appleid.apple.com](https://appleid.apple.com/)
 2. 进入 **"安全"** → **"使用您 Apple ID 登录的 App"**
 3. 找到你的应用，点击 **"停止使用 Apple ID"**
@@ -988,6 +1028,7 @@ LunaTV 从 Apple id_token 中获取：
 #### Q6: 私钥文件丢失怎么办？
 
 **解决方案**：
+
 - 私钥只能下载一次，丢失后无法恢复
 - 需要在 Apple Developer Portal 创建新的私钥
 - 使用新私钥重新生成 Client Secret
@@ -1009,6 +1050,7 @@ LinuxDo 是基于 Discourse 论坛系统的中文技术社区，提供了独立�
 ### 步骤 1：注册 OAuth2 应用
 
 1. 访问 LinuxDo Connect 应用注册页面：
+
    ```
    https://connect.linux.do/dash/sso/new
    ```
@@ -1017,16 +1059,16 @@ LinuxDo 是基于 Discourse 论坛系统的中文技术社区，提供了独立�
 
 3. 填写应用注册表单：
 
-   | 字段 | 说明 | 示例值 |
-   |------|------|--------|
-   | **Client Name** | 应用显示名称 | `LunaTV 影视平台` |
-   | **Client URI** | 应用官网地址 | `https://your-domain.com` |
-   | **Redirect URI** | 授权回调地址（必须精确匹配） | `https://your-domain.com/api/auth/oidc/callback` |
-   | **Logo URI** | 应用Logo图标地址（可选） | `https://your-domain.com/logo.png` |
-   | **TOS URI** | 服务条款页面地址（可选） | `https://your-domain.com/terms` |
-   | **Policy URI** | 隐私政策页面地址（可选） | `https://your-domain.com/privacy` |
-   | **Software ID** | 软件包标识符（可选） | `com.yourcompany.lunatv` |
-   | **Software Version** | 软件版本号（可选） | `1.0.0` |
+   | 字段                 | 说明                         | 示例值                                           |
+   | -------------------- | ---------------------------- | ------------------------------------------------ |
+   | **Client Name**      | 应用显示名称                 | `LunaTV 影视平台`                                |
+   | **Client URI**       | 应用官网地址                 | `https://your-domain.com`                        |
+   | **Redirect URI**     | 授权回调地址（必须精确匹配） | `https://your-domain.com/api/auth/oidc/callback` |
+   | **Logo URI**         | 应用Logo图标地址（可选）     | `https://your-domain.com/logo.png`               |
+   | **TOS URI**          | 服务条款页面地址（可选）     | `https://your-domain.com/terms`                  |
+   | **Policy URI**       | 隐私政策页面地址（可选）     | `https://your-domain.com/privacy`                |
+   | **Software ID**      | 软件包标识符（可选）         | `com.yourcompany.lunatv`                         |
+   | **Software Version** | 软件版本号（可选）           | `1.0.0`                                          |
 
 4. 提交表单，等待审核通过
 
@@ -1038,6 +1080,7 @@ LinuxDo 是基于 Discourse 论坛系统的中文技术社区，提供了独立�
 - **Client Secret**：应用的密钥（请妥善保管，不要公开）
 
 ⚠️ **安全提示**：
+
 - Client Secret 类似于密码，切勿公开或提交到代码仓库
 - 如果泄露，请立即删除应用并重新注册
 
@@ -1079,6 +1122,7 @@ grant_type=authorization_code&code=xxx&redirect_uri=https://your-domain.com/api/
 ```
 
 **计算 Authorization Header**：
+
 ```javascript
 const credentials = `${clientId}:${clientSecret}`;
 const base64Credentials = Buffer.from(credentials).toString('base64');
@@ -1101,6 +1145,7 @@ const authHeader = `Basic ${base64Credentials}`;
 ```
 
 **字段说明**：
+
 - `id`：用户在 LinuxDo 的唯一 ID
 - `username`：用户名
 - `name`：用户显示名称
@@ -1112,13 +1157,13 @@ const authHeader = `Basic ${base64Credentials}`;
 
 LinuxDo 使用 Discourse 的信任等级系统（Trust Level 0-4）来管理用户权限：
 
-| 等级 | 名称 | 获得条件 | 特点 |
-|------|------|----------|------|
-| **TL0** | 新用户 | 刚注册 | 功能受限，防止垃圾账号 |
-| **TL1** | 基础用户 | 阅读主题、花费一定时间 | 可以发帖回复 |
-| **TL2** | 成员 | 持续活跃、收到点赞 | 更多权限，如上传图片 |
-| **TL3** | 资深成员 | 长期活跃、高质量内容 | 可以重新分类主题 |
-| **TL4** | 领袖 | 由管理员手动授予 | 接近版主权限 |
+| 等级    | 名称     | 获得条件               | 特点                   |
+| ------- | -------- | ---------------------- | ---------------------- |
+| **TL0** | 新用户   | 刚注册                 | 功能受限，防止垃圾账号 |
+| **TL1** | 基础用户 | 阅读主题、花费一定时间 | 可以发帖回复           |
+| **TL2** | 成员     | 持续活跃、收到点赞     | 更多权限，如上传图片   |
+| **TL3** | 资深成员 | 长期活跃、高质量内容   | 可以重新分类主题       |
+| **TL4** | 领袖     | 由管理员手动授予       | 接近版主权限           |
 
 **在 LunaTV 中配置最低信任等级**（`minTrustLevel` 字段）：
 
@@ -1156,6 +1201,7 @@ A：LinuxDo Connect 应用需要人工审核，通常 1-3 个工作日内会处�
 **Q2：Token 请求返回 401 Unauthorized？**
 
 A：检查以下几点：
+
 - Client ID 和 Client Secret 是否正确
 - Authorization Header 是否正确计算 Base64 编码
 - Redirect URI 是否与注册时填写的**完全一致**（包括协议、域名、路径）
@@ -1163,17 +1209,20 @@ A：检查以下几点：
 **Q3：用户登录后提示"信任等级不满足要求"？**
 
 A：该用户的 `trust_level` 低于你在后台配置的 `minTrustLevel`。解决方案：
+
 - 降低 `minTrustLevel` 设置
 - 或者让用户在 LinuxDo 论坛多活跃，提升信任等级
 
 **Q4：如何测试 OAuth2 流程？**
 
 A：可以使用 LinuxDo 提供的测试工具：
+
 1. 使用 Postman 或 curl 测试各端点
 2. 检查浏览器开发者工具的网络请求
 3. 查看 LunaTV 服务器日志中的 OIDC 相关输出
 
 ### 参考资料
+
 - [LinuxDo Connect 官方文档](https://connect.linux.do/docs)（如有）
 - [小白也能懂的 LinuxDo OAuth2 快速上手](https://linux.do/t/topic/30578)
 - [Discourse Trust Levels 官方说明](https://blog.discourse.org/2018/06/understanding-discourse-trust-levels/)
@@ -1192,19 +1241,19 @@ A：可以使用 LinuxDo 提供的测试工具：
 
 #### 1. 基础设置
 
-| 选项 | 说明 | 示例 |
-|------|------|------|
-| **启用 OIDC 登录** | 总开关，控制是否启用 OIDC 功能 | `开启` |
-| **启用 OIDC 注册** | 允许新用户通过 OIDC 自动注册 | `开启`（推荐） |
-| **登录按钮文字** | 登录页面显示的按钮文本 | `使用 Google 登录` |
+| 选项               | 说明                           | 示例               |
+| ------------------ | ------------------------------ | ------------------ |
+| **启用 OIDC 登录** | 总开关，控制是否启用 OIDC 功能 | `开启`             |
+| **启用 OIDC 注册** | 允许新用户通过 OIDC 自动注册   | `开启`（推荐）     |
+| **登录按钮文字**   | 登录页面显示的按钮文本         | `使用 Google 登录` |
 
 #### 2. OIDC 提供商信息
 
-| 选项 | 说明 | 获取方式 |
-|------|------|----------|
-| **Issuer URL** | OIDC 提供商的基础 URL | 见上文各提供商配置 |
-| **Client ID** | 应用的唯一标识符 | 在提供商后台获取 |
-| **Client Secret** | 应用密钥（**保密**） | 在提供商后台获取 |
+| 选项              | 说明                  | 获取方式           |
+| ----------------- | --------------------- | ------------------ |
+| **Issuer URL**    | OIDC 提供商的基础 URL | 见上文各提供商配置 |
+| **Client ID**     | 应用的唯一标识符      | 在提供商后台获取   |
+| **Client Secret** | 应用密钥（**保密**）  | 在提供商后台获取   |
 
 #### 3. 端点配置
 
@@ -1219,16 +1268,16 @@ A：可以使用 LinuxDo 提供的测试工具：
 
 如果自动发现失败，或提供商不支持，需手动填写：
 
-| 端点 | 说明 |
-|------|------|
-| **Authorization Endpoint** | 授权端点 URL |
-| **Token Endpoint** | 令牌端点 URL |
-| **UserInfo Endpoint** | 用户信息端点 URL |
+| 端点                       | 说明             |
+| -------------------------- | ---------------- |
+| **Authorization Endpoint** | 授权端点 URL     |
+| **Token Endpoint**         | 令牌端点 URL     |
+| **UserInfo Endpoint**      | 用户信息端点 URL |
 
 #### 4. LinuxDo 专属配置
 
-| 选项 | 说明 | 推荐值 |
-|------|------|--------|
+| 选项             | 说明                     | 推荐值                                  |
+| ---------------- | ------------------------ | --------------------------------------- |
 | **最低信任等级** | 限制用户最低 Trust Level | `0`（允许所有用户）或 `2`（防垃圾账号） |
 
 **设为 0**：允许所有 LinuxDo 用户登录
@@ -1330,18 +1379,20 @@ UserInfo Endpoint: https://connect.linux.do/api/user
 **原因**：回调 URL 配置不匹配。
 
 **解决方案**：
+
 1. 检查 LunaTV 实际访问地址（包括协议、域名、端口）
 2. 确保提供商后台配置的回调 URL **完全一致**
 3. 注意：
    - `http://localhost:3000` ≠ `http://127.0.0.1:3000`
    - `https://example.com` ≠ `https://www.example.com`
-   - 末尾不要有斜杠：`/api/auth/oidc/callback` ✅  `/api/auth/oidc/callback/` ❌
+   - 末尾不要有斜杠：`/api/auth/oidc/callback` ✅ `/api/auth/oidc/callback/` ❌
 
 ### Q2: 登录后提示 "用户信息获取失败"
 
 **原因**：UserInfo Endpoint 配置错误或提供商返回格式不兼容。
 
 **解决方案**：
+
 1. 检查 UserInfo Endpoint URL 是否正确
 2. 查看 LunaTV 后台日志（浏览器控制台 Network 标签）
 3. 确认提供商是否支持 `openid`、`profile`、`email` 范围
@@ -1355,6 +1406,7 @@ UserInfo Endpoint: https://connect.linux.do/api/user
 ### Q4: Client Secret 泄露了怎么办？
 
 **紧急处理**：
+
 1. **立即**前往提供商后台重新生成新的 Client Secret
 2. 删除或撤销旧的 Secret
 3. 更新 LunaTV 后台配置为新 Secret
@@ -1363,6 +1415,7 @@ UserInfo Endpoint: https://connect.linux.do/api/user
 ### Q5: 如何测试 OIDC 配置是否正确？
 
 **测试步骤**：
+
 1. 保存 OIDC 配置后，退出 LunaTV 登录
 2. 访问登录页面，应该看到 OIDC 登录按钮
 3. 点击按钮，应跳转到提供商登录页面
@@ -1382,16 +1435,19 @@ GitHub:     http://localhost:3000/api/auth/oidc/callback ✅
 ```
 
 **注意**：
+
 - 本地开发可使用 `http://`（无需 HTTPS）
 - 生产环境**必须**使用 `https://`
 
 ### Q7: 如何禁止某些用户通过 OIDC 登录？
 
 **方案 1**：在 LunaTV 后台封禁用户
+
 1. 进入 **用户管理**
 2. 找到该用户，点击 **封禁**
 
 **方案 2**：提高 LinuxDo 最低信任等级
+
 - 设置为 `2` 或 `3`，限制低活跃度用户
 
 ### Q8: 能否同时配置多个 OIDC 提供商？
@@ -1399,12 +1455,14 @@ GitHub:     http://localhost:3000/api/auth/oidc/callback ✅
 **✅ 已支持**！LunaTV 的多 Provider 模式允许同时配置多个 OIDC 提供商。
 
 **配置方式**：
+
 1. 进入管理后台 → **系统设置** → **OIDC 认证配置**
 2. 切换到 **"多 Provider 模式（推荐）"**
 3. 点击 **"添加 Provider"** 可添加多个提供商
 4. 支持同时配置：Google、Microsoft、GitHub、Facebook、微信、Apple、LinuxDo 等
 
 **用户体验**：
+
 - 登录页面将显示所有已启用 Provider 的登录按钮
 - 用户可选择任一方式登录
 - 每个 Provider 可单独设置是否允许注册
@@ -1412,6 +1470,7 @@ GitHub:     http://localhost:3000/api/auth/oidc/callback ✅
 ### Q9: OIDC 用户的密码是什么？
 
 **说明**：
+
 - OIDC 用户没有传统密码
 - 用户通过 OIDC 提供商（如 Google）登录，LunaTV 不存储密码
 - 管理员可在后台为 OIDC 用户设置密码，允许其使用密码登录
@@ -1419,6 +1478,7 @@ GitHub:     http://localhost:3000/api/auth/oidc/callback ✅
 ### Q10: 自动注册的 OIDC 用户有哪些权限？
 
 **默认权限**：
+
 - 角色：普通用户（`user`）
 - 用户组：按 **站点配置 → 默认用户组** 设置
 - 采集源权限：继承所在用户组的权限

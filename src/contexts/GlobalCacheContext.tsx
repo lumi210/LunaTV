@@ -133,16 +133,19 @@ export function GlobalCacheProvider({ children }: { children: ReactNode }) {
         fetchingRef.current.delete(cacheKey);
       }
     },
-    [homeData, homeLastFetch]
+    [homeData, homeLastFetch],
   );
 
   // === 部分更新首页数据（用于详情加载后更新） ===
-  const updateHomeDataPartial = useCallback((updates: Partial<HomePageData>) => {
-    setHomeData((prev) => {
-      if (!prev) return prev;
-      return { ...prev, ...updates };
-    });
-  }, []);
+  const updateHomeDataPartial = useCallback(
+    (updates: Partial<HomePageData>) => {
+      setHomeData((prev) => {
+        if (!prev) return prev;
+        return { ...prev, ...updates };
+      });
+    },
+    [],
+  );
 
   // === 清除所有缓存 ===
   const clearAllCache = useCallback(() => {
@@ -171,7 +174,7 @@ export function GlobalCacheProvider({ children }: { children: ReactNode }) {
       fetchHomeData,
       updateHomeDataPartial,
       clearAllCache,
-    ]
+    ],
   );
 
   return (
@@ -208,7 +211,14 @@ async function fetchHomeDataFromAPI(): Promise<HomePageData> {
     GetBangumiCalendarData(),
   ]);
 
-  const [moviesResult, tvResult, varietyResult, animeResult, shortDramasResult, bangumiResult] = results;
+  const [
+    moviesResult,
+    tvResult,
+    varietyResult,
+    animeResult,
+    shortDramasResult,
+    bangumiResult,
+  ] = results;
 
   return {
     hotMovies:

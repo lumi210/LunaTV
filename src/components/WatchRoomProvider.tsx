@@ -2,10 +2,22 @@
 
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from 'react';
 import { useWatchRoom } from '@/hooks/useWatchRoom';
 import { getAuthInfoFromBrowserCookie } from '@/lib/auth';
-import type { Room, Member, ChatMessage, LiveState } from '@/types/watch-room.types';
+import type {
+  Room,
+  Member,
+  ChatMessage,
+  LiveState,
+} from '@/types/watch-room.types';
 
 export interface WatchRoomContextType {
   socket: any | null;
@@ -51,7 +63,9 @@ const WatchRoomContext = createContext<WatchRoomContextType | null>(null);
 export const useWatchRoomContext = () => {
   const context = useContext(WatchRoomContext);
   if (!context) {
-    throw new Error('useWatchRoomContext must be used within WatchRoomProvider');
+    throw new Error(
+      'useWatchRoomContext must be used within WatchRoomProvider',
+    );
   }
   return context;
 };
@@ -66,7 +80,10 @@ interface WatchRoomProviderProps {
 }
 
 export function WatchRoomProvider({ children }: WatchRoomProviderProps) {
-  const [config, setConfig] = useState<{ enabled: boolean; serverUrl: string } | null>(null);
+  const [config, setConfig] = useState<{
+    enabled: boolean;
+    serverUrl: string;
+  } | null>(null);
   const [isEnabled, setIsEnabled] = useState(false);
   const [configLoading, setConfigLoading] = useState(true);
   const [authKey, setAuthKey] = useState('');
@@ -84,7 +101,9 @@ export function WatchRoomProvider({ children }: WatchRoomProviderProps) {
 
     const checkUsername = () => {
       checkCount++;
-      console.log(`[WatchRoom] Checking username (${checkCount}/${maxChecks})...`);
+      console.log(
+        `[WatchRoom] Checking username (${checkCount}/${maxChecks})...`,
+      );
       console.log('[WatchRoom] All cookies:', document.cookie);
 
       const authInfo = getAuthInfoFromBrowserCookie();
@@ -99,7 +118,11 @@ export function WatchRoomProvider({ children }: WatchRoomProviderProps) {
         if (intervalId) clearInterval(intervalId);
       } else if (checkCount >= maxChecks) {
         // 达到最大检查次数，放弃
-        console.log('[WatchRoom] ✗ Failed to load username after', maxChecks, 'attempts');
+        console.log(
+          '[WatchRoom] ✗ Failed to load username after',
+          maxChecks,
+          'attempts',
+        );
         setCurrentUserName('游客');
         setUserNameLoaded(true);
         if (intervalId) clearInterval(intervalId);
@@ -130,7 +153,11 @@ export function WatchRoomProvider({ children }: WatchRoomProviderProps) {
   // 加载配置
   useEffect(() => {
     const loadConfig = async (retryCount = 0) => {
-      console.log('[WatchRoom] Loading config... (attempt', retryCount + 1, ')');
+      console.log(
+        '[WatchRoom] Loading config... (attempt',
+        retryCount + 1,
+        ')',
+      );
       try {
         const response = await fetch('/api/watch-room/config');
         console.log('[WatchRoom] Config response status:', response.status);

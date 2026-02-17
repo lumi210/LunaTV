@@ -46,7 +46,7 @@ export async function getSpiderJarFromBlob(): Promise<{
 export async function uploadSpiderJarToBlob(
   buffer: Buffer,
   md5: string,
-  source: string
+  source: string,
 ): Promise<string | null> {
   if (!isBlobAvailable()) {
     console.warn('[Blob] Blob Storage not available, skipping upload');

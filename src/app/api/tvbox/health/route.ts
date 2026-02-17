@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
         {
           error: 'Missing jar URL parameter',
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -30,8 +30,7 @@ export async function GET(req: NextRequest) {
         method: 'HEAD',
         signal: controller.signal,
         headers: {
-          'User-Agent':
-            DEFAULT_USER_AGENT,
+          'User-Agent': DEFAULT_USER_AGENT,
         },
       });
 
@@ -68,7 +67,7 @@ export async function GET(req: NextRequest) {
         error: 'Internal server error',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

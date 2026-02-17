@@ -7,7 +7,7 @@ interface UseInViewOptions {
 }
 
 export function useInView<T extends HTMLElement>(
-  options: UseInViewOptions = {}
+  options: UseInViewOptions = {},
 ) {
   const { threshold = 0.1, rootMargin = '50px', triggerOnce = false } = options;
   const [isInView, setIsInView] = useState(false);
@@ -30,7 +30,7 @@ export function useInView<T extends HTMLElement>(
           setHasTriggered(true);
         }
       },
-      { threshold, rootMargin }
+      { threshold, rootMargin },
     );
 
     observer.observe(element);

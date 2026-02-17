@@ -15,7 +15,12 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ['public/sw.js', 'public/workbox-*.js', 'node_modules/**', '.next/**'],
+    ignores: [
+      'public/sw.js',
+      'public/workbox-*.js',
+      'node_modules/**',
+      '.next/**',
+    ],
   },
   ...compat.extends('next/core-web-vitals', 'prettier'),
   {

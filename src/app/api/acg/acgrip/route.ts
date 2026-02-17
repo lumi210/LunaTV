@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     if (!keyword || typeof keyword !== 'string') {
       return NextResponse.json(
         { error: '搜索关键词不能为空' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     if (!trimmedKeyword) {
       return NextResponse.json(
         { error: '搜索关键词不能为空' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     if (isNaN(pageNum) || pageNum < 1) {
       return NextResponse.json(
         { error: '页码必须是大于0的整数' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -56,16 +56,20 @@ export async function POST(req: NextRequest) {
     try {
       const cached = await db.getCache(cacheKey);
       if (cached) {
-        console.log(`✅ ACG.RIP 搜索缓存命中: "${trimmedKeyword}" 第${pageNum}页`);
+        console.log(
+          `✅ ACG.RIP 搜索缓存命中: "${trimmedKeyword}" 第${pageNum}页`,
+        );
         return NextResponse.json({
           ...cached,
           fromCache: true,
           cacheSource: 'database',
-          cacheTimestamp: new Date().toISOString()
+          cacheTimestamp: new Date().toISOString(),
         });
       }
 
-      console.log(`❌ ACG.RIP 搜索缓存未命中: "${trimmedKeyword}" 第${pageNum}页`);
+      console.log(
+        `❌ ACG.RIP 搜索缓存未命中: "${trimmedKeyword}" 第${pageNum}页`,
+      );
     } catch (cacheError) {
       console.warn('ACG.RIP 搜索缓存读取失败:', cacheError);
       // 缓存失败不影响主流程，继续执行
@@ -109,16 +113,19 @@ export async function POST(req: NextRequest) {
       if (description) {
         const imgMatches = description.match(/src="([^"]+)"/g);
         if (imgMatches) {
-          images = imgMatches.map((match: string) => {
-            const urlMatch = match.match(/src="([^"]+)"/);
-            return urlMatch ? urlMatch[1] : '';
-          }).filter(Boolean);
+          images = imgMatches
+            .map((match: string) => {
+              const urlMatch = match.match(/src="([^"]+)"/);
+              return urlMatch ? urlMatch[1] : '';
+            })
+            .filter(Boolean);
         }
       }
 
       const title = item.title?.[0] || '';
       const link = item.link?.[0] || '';
-      const guid = item.guid?.[0] || link || `${title}-${item.pubDate?.[0] || ''}`;
+      const guid =
+        item.guid?.[0] || link || `${title}-${item.pubDate?.[0] || ''}`;
       const pubDate = item.pubDate?.[0] || '';
       const torrentUrl = item.enclosure?.[0]?.$?.url || '';
 
@@ -143,7 +150,9 @@ export async function POST(req: NextRequest) {
     // 保存到缓存
     try {
       await db.setCache(cacheKey, responseData, ACG_CACHE_TIME);
-      console.log(`💾 ACG.RIP 搜索结果已缓存: "${trimmedKeyword}" 第${pageNum}页 - ${results.length} 个结果, TTL: ${ACG_CACHE_TIME}s`);
+      console.log(
+        `💾 ACG.RIP 搜索结果已缓存: "${trimmedKeyword}" 第${pageNum}页 - ${results.length} 个结果, TTL: ${ACG_CACHE_TIME}s`,
+      );
     } catch (cacheError) {
       console.warn('ACG.RIP 搜索缓存保存失败:', cacheError);
     }
@@ -153,7 +162,7 @@ export async function POST(req: NextRequest) {
     console.error('ACG.RIP 搜索失败:', error);
     return NextResponse.json(
       { error: error.message || '搜索失败' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

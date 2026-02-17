@@ -7,7 +7,10 @@ interface PlayErrorDisplayProps {
   videoTitle?: string;
 }
 
-export default function PlayErrorDisplay({ error, videoTitle }: PlayErrorDisplayProps) {
+export default function PlayErrorDisplay({
+  error,
+  videoTitle,
+}: PlayErrorDisplayProps) {
   const router = useRouter();
 
   return (

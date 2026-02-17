@@ -6,7 +6,9 @@ declare module '@/lib/artplayer-plugin-chromecast' {
     mimeType?: string;
     title?: string;
     poster?: string;
-    onStateChange?: (state: 'connected' | 'connecting' | 'disconnected' | 'disconnecting') => void;
+    onStateChange?: (
+      state: 'connected' | 'connecting' | 'disconnected' | 'disconnecting',
+    ) => void;
     onCastAvailable?: (available: boolean) => void;
     onCastStart?: () => void;
     onCastEnd?: () => void;
@@ -28,6 +30,8 @@ declare module '@/lib/artplayer-plugin-chromecast' {
     setMediaInfo: (info: MediaInfo) => void;
   }
 
-  function artplayerPluginChromecast(options?: ChromecastPluginOptions): (art: any) => Promise<ChromecastPlugin>;
+  function artplayerPluginChromecast(
+    options?: ChromecastPluginOptions,
+  ): (art: any) => Promise<ChromecastPlugin>;
   export default artplayerPluginChromecast;
 }

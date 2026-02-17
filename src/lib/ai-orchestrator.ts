@@ -40,46 +40,106 @@ export interface OrchestrationResult {
  */
 export function analyzeIntent(
   message: string,
-  context?: VideoContext
+  context?: VideoContext,
 ): IntentAnalysisResult {
   const lowerMessage = message.toLowerCase();
 
   // 时效性关键词 - 需要最新信息的问题
   const timeKeywords = [
-    '最新', '今年', '2024', '2025', '2026', '即将', '上映', '新出',
-    '什么时候', '何时', '几时', '播出', '更新', '下一季',
-    '第二季', '第三季', '续集', '下季', '下部', '最近',
-    '新番', '新剧', '新片', '刚出', '刚上映', '有片源', '已上映',
-    '可以看', '在哪看', '能看', '已播', '正在热映', '热播'
+    '最新',
+    '今年',
+    '2024',
+    '2025',
+    '2026',
+    '即将',
+    '上映',
+    '新出',
+    '什么时候',
+    '何时',
+    '几时',
+    '播出',
+    '更新',
+    '下一季',
+    '第二季',
+    '第三季',
+    '续集',
+    '下季',
+    '下部',
+    '最近',
+    '新番',
+    '新剧',
+    '新片',
+    '刚出',
+    '刚上映',
+    '有片源',
+    '已上映',
+    '可以看',
+    '在哪看',
+    '能看',
+    '已播',
+    '正在热映',
+    '热播',
   ];
 
   // 推荐类关键词
   const recommendKeywords = [
-    '推荐', '有什么', '好看', '值得', '介绍',
-    '求片', '求推荐', '找片', '想看'
+    '推荐',
+    '有什么',
+    '好看',
+    '值得',
+    '介绍',
+    '求片',
+    '求推荐',
+    '找片',
+    '想看',
   ];
 
   // 演员/导演关键词
   const personKeywords = [
-    '演员', '导演', '主演', '出演', '作品',
-    '演过', '拍过', '主角', '配音', '声优'
+    '演员',
+    '导演',
+    '主演',
+    '出演',
+    '作品',
+    '演过',
+    '拍过',
+    '主角',
+    '配音',
+    '声优',
   ];
 
   // 剧情相关关键词
   const plotKeywords = [
-    '讲什么', '剧情', '故事', '内容', '讲的是',
-    '结局', '大结局', '剧透', '评价', '口碑'
+    '讲什么',
+    '剧情',
+    '故事',
+    '内容',
+    '讲的是',
+    '结局',
+    '大结局',
+    '剧透',
+    '评价',
+    '口碑',
   ];
 
   // 新闻/资讯关键词
   const newsKeywords = [
-    '新闻', '消息', '爆料', '官宣', '定档',
-    '杀青', '开拍', '票房', '收视'
+    '新闻',
+    '消息',
+    '爆料',
+    '官宣',
+    '定档',
+    '杀青',
+    '开拍',
+    '票房',
+    '收视',
   ];
 
   // 计算关键词匹配度
   const hasTimeKeyword = timeKeywords.some((k) => message.includes(k));
-  const hasRecommendKeyword = recommendKeywords.some((k) => message.includes(k));
+  const hasRecommendKeyword = recommendKeywords.some((k) =>
+    message.includes(k),
+  );
   const hasPersonKeyword = personKeywords.some((k) => message.includes(k));
   const hasPlotKeyword = plotKeywords.some((k) => message.includes(k));
   const hasNewsKeyword = newsKeywords.some((k) => message.includes(k));
@@ -91,7 +151,10 @@ export function analyzeIntent(
   if (hasRecommendKeyword) {
     type = 'recommendation';
     confidence = 0.8;
-  } else if (context?.title && (hasPlotKeyword || lowerMessage.includes('这部'))) {
+  } else if (
+    context?.title &&
+    (hasPlotKeyword || lowerMessage.includes('这部'))
+  ) {
     type = 'detail';
     confidence = 0.9;
   } else if (hasPersonKeyword || hasNewsKeyword) {
@@ -111,7 +174,10 @@ export function analyzeIntent(
     hasPersonKeyword ||
     hasNewsKeyword ||
     (hasRecommendKeyword && (hasTimeKeyword || message.includes('热门'))) ||
-    (context?.title && type === 'detail' && context.year && parseInt(context.year) >= 2024);
+    (context?.title &&
+      type === 'detail' &&
+      context.year &&
+      parseInt(context.year) >= 2024);
 
   // 提取关键词
   const matchedKeywords = [
@@ -147,7 +213,7 @@ class ApiKeyRotator {
     if (this.keys.length === 0) return null;
 
     // 过滤掉失败的keys
-    const availableKeys = this.keys.filter(k => !this.failedKeys.has(k));
+    const availableKeys = this.keys.filter((k) => !this.failedKeys.has(k));
     if (availableKeys.length === 0) {
       // 所有keys都失败了，重置失败记录重试
       this.failedKeys.clear();
@@ -185,7 +251,7 @@ export async function fetchTavilySearch(
   options?: {
     maxResults?: number;
     includeDomains?: string[];
-  }
+  },
 ): Promise<TavilySearchResult | null> {
   const rotator = new ApiKeyRotator(apiKeys);
   const maxRetries = Array.isArray(apiKeys) ? apiKeys.length : 1;
@@ -212,7 +278,7 @@ export async function fetchTavilySearch(
             'imdb.com',
             'themoviedb.org',
             'mtime.com',
-            'bilibili.com'
+            'bilibili.com',
           ],
           max_results: options?.maxResults || 5,
         }),
@@ -221,7 +287,9 @@ export async function fetchTavilySearch(
       if (!response.ok) {
         // API Key可能失效或达到限额
         if (response.status === 401 || response.status === 429) {
-          console.warn(`Tavily API Key ${apiKey.slice(0, 8)}... 失败 (${response.status})`);
+          console.warn(
+            `Tavily API Key ${apiKey.slice(0, 8)}... 失败 (${response.status})`,
+          );
           rotator.markFailed(apiKey);
           continue; // 尝试下一个key
         }
@@ -232,7 +300,10 @@ export async function fetchTavilySearch(
       console.log(`✅ Tavily搜索成功，使用key: ${apiKey.slice(0, 8)}...`);
       return data;
     } catch (error) {
-      console.error(`Tavily搜索失败 (attempt ${attempt + 1}/${maxRetries}):`, error);
+      console.error(
+        `Tavily搜索失败 (attempt ${attempt + 1}/${maxRetries}):`,
+        error,
+      );
       if (attempt === maxRetries - 1) {
         return null;
       }
@@ -257,7 +328,7 @@ export function formatTavilyResults(results: TavilySearchResult): string {
 标题: ${r.title}
 内容: ${r.content}
 来源: ${r.url}
-`
+`,
     )
     .join('\n');
 }
@@ -272,7 +343,8 @@ async function fetchDoubanData(doubanId: number): Promise<any | null> {
 
   try {
     // 直接导入并调用豆瓣scraper函数（避免HTTP请求，支持Vercel/Docker）
-    const { scrapeDoubanDetails } = await import('@/app/api/douban/details/route');
+    const { scrapeDoubanDetails } =
+      await import('@/app/api/douban/details/route');
 
     const result = await scrapeDoubanDetails(doubanId.toString());
 
@@ -296,7 +368,7 @@ async function fetchTMDBData(
   tmdbId: number | undefined,
   type: 'movie' | 'tv',
   title?: string,
-  year?: string
+  year?: string,
 ): Promise<any | null> {
   let actualTmdbId = tmdbId;
 
@@ -304,11 +376,13 @@ async function fetchTMDBData(
   if (!actualTmdbId && title) {
     try {
       console.log(`🔍 没有TMDB ID，尝试搜索: ${title} (${year || '无年份'})`);
-      const { searchTMDBMovie, searchTMDBTV } = await import('@/lib/tmdb.client');
+      const { searchTMDBMovie, searchTMDBTV } =
+        await import('@/lib/tmdb.client');
 
-      const searchResult = type === 'movie'
-        ? await searchTMDBMovie(title, year)
-        : await searchTMDBTV(title, year);
+      const searchResult =
+        type === 'movie'
+          ? await searchTMDBMovie(title, year)
+          : await searchTMDBTV(title, year);
 
       if (searchResult) {
         actualTmdbId = searchResult.id;
@@ -329,22 +403,29 @@ async function fetchTMDBData(
 
   try {
     // 直接导入TMDB客户端函数
-    const { getTMDBMovieDetails, getTMDBTVDetails } = await import('@/lib/tmdb.client');
+    const { getTMDBMovieDetails, getTMDBTVDetails } =
+      await import('@/lib/tmdb.client');
 
-    const result = type === 'movie'
-      ? await getTMDBMovieDetails(actualTmdbId)
-      : await getTMDBTVDetails(actualTmdbId);
+    const result =
+      type === 'movie'
+        ? await getTMDBMovieDetails(actualTmdbId)
+        : await getTMDBTVDetails(actualTmdbId);
 
     if (result) {
       const title = (result as any).title || (result as any).name || '';
-      console.log(`✅ TMDB数据: ${title} (keywords: ${result.keywords?.length || 0}, similar: ${result.similar?.length || 0})`);
+      console.log(
+        `✅ TMDB数据: ${title} (keywords: ${result.keywords?.length || 0}, similar: ${result.similar?.length || 0})`,
+      );
       return result;
     }
 
     console.warn(`⚠️ TMDB数据获取失败 (ID: ${actualTmdbId}, type: ${type})`);
     return null;
   } catch (error) {
-    console.error(`❌ 获取TMDB详情失败 (ID: ${actualTmdbId}, type: ${type}):`, error);
+    console.error(
+      `❌ 获取TMDB详情失败 (ID: ${actualTmdbId}, type: ${type}):`,
+      error,
+    );
     return null;
   }
 }
@@ -359,7 +440,7 @@ export async function orchestrateDataSources(
     enableWebSearch: boolean;
     tavilyApiKeys?: string | string[];
     siteName?: string;
-  }
+  },
 ): Promise<OrchestrationResult> {
   // 1. 意图分析
   const intent = analyzeIntent(userMessage, context);
@@ -367,7 +448,7 @@ export async function orchestrateDataSources(
     type: intent.type,
     needWebSearch: intent.needWebSearch,
     confidence: intent.confidence,
-    keywords: intent.keywords
+    keywords: intent.keywords,
   });
 
   // 2. 构建基础系统提示词
@@ -388,15 +469,11 @@ ${config?.enableWebSearch && intent.needWebSearch ? '- 搜索最新影视资讯�
 
   // 3. 如果需要且启用了联网搜索，则获取实时数据
   let webSearchResults: TavilySearchResult | null = null;
-  if (
-    intent.needWebSearch &&
-    config?.enableWebSearch &&
-    config.tavilyApiKeys
-  ) {
+  if (intent.needWebSearch && config?.enableWebSearch && config.tavilyApiKeys) {
     console.log('🌐 开始联网搜索...');
     webSearchResults = await fetchTavilySearch(
       userMessage,
-      config.tavilyApiKeys
+      config.tavilyApiKeys,
     );
 
     if (webSearchResults && webSearchResults.results.length > 0) {
@@ -406,7 +483,9 @@ ${config?.enableWebSearch && intent.needWebSearch ? '- 搜索最新影视资讯�
       systemPrompt += `\n**重要**: 在你的回复开头，必须添加以下提示（使用Markdown格式）：\n`;
       systemPrompt += `> 🌐 **已联网搜索最新资讯**\n\n`;
       systemPrompt += `然后再开始正式回答问题。\n`;
-      console.log(`✅ 联网搜索完成，获取到 ${webSearchResults.results.length} 条结果`);
+      console.log(
+        `✅ 联网搜索完成，获取到 ${webSearchResults.results.length} 条结果`,
+      );
     } else {
       console.log('⚠️ 联网搜索未返回结果');
     }
@@ -424,7 +503,10 @@ ${config?.enableWebSearch && intent.needWebSearch ? '- 搜索最新影视资讯�
         let detectedType: 'movie' | 'tv' | undefined;
 
         // 判断逻辑：有集数或单集片长 = 剧集，有电影时长 = 电影
-        if ((doubanData.episodes && doubanData.episodes > 0) || doubanData.episode_length !== undefined) {
+        if (
+          (doubanData.episodes && doubanData.episodes > 0) ||
+          doubanData.episode_length !== undefined
+        ) {
           detectedType = 'tv';
         } else if (doubanData.movie_duration !== undefined) {
           detectedType = 'movie';
@@ -432,7 +514,9 @@ ${config?.enableWebSearch && intent.needWebSearch ? '- 搜索最新影视资讯�
 
         // 使用检测到的类型自动修正前端传参错误
         if (detectedType && detectedType !== context.type) {
-          console.log(`🔧 类型自动修正: ${context.type} → ${detectedType} (集数:${doubanData.episodes}, 单集片长:${doubanData.episode_length}, 电影时长:${doubanData.movie_duration})`);
+          console.log(
+            `🔧 类型自动修正: ${context.type} → ${detectedType} (集数:${doubanData.episodes}, 单集片长:${doubanData.episode_length}, 电影时长:${doubanData.movie_duration})`,
+          );
           context.type = detectedType;
         } else if (detectedType) {
           console.log(`✅ 类型验证通过: ${context.type}`);
@@ -484,9 +568,10 @@ ${config?.enableWebSearch && intent.needWebSearch ? '- 搜索最新影视资讯�
 
         if (doubanData.plot_summary) {
           // 限制简介长度，避免token过多
-          const summary = doubanData.plot_summary.length > 300
-            ? doubanData.plot_summary.substring(0, 300) + '...'
-            : doubanData.plot_summary;
+          const summary =
+            doubanData.plot_summary.length > 300
+              ? doubanData.plot_summary.substring(0, 300) + '...'
+              : doubanData.plot_summary;
           systemPrompt += `剧情简介: ${summary}\n`;
         }
 
@@ -543,12 +628,14 @@ ${config?.enableWebSearch && intent.needWebSearch ? '- 搜索最新影视资讯�
     // 🔥 如果有video context且有type，尝试获取TMDB数据
     // 优先使用tmdb_id，如果没有则通过标题搜索
     if (context.title && context.type) {
-      console.log(`🎬 开始获取TMDB详情 (title: ${context.title}, type: ${context.type})...`);
+      console.log(
+        `🎬 开始获取TMDB详情 (title: ${context.title}, type: ${context.type})...`,
+      );
       const tmdbData = await fetchTMDBData(
         context.tmdb_id,
         context.type,
         context.title,
-        context.year
+        context.year,
       );
 
       if (tmdbData) {
@@ -556,7 +643,9 @@ ${config?.enableWebSearch && intent.needWebSearch ? '- 搜索最新影视资讯�
 
         // Keywords - 帮助AI理解影片主题
         if (tmdbData.keywords && tmdbData.keywords.length > 0) {
-          const keywordNames = tmdbData.keywords.map((k: any) => k.name).join(', ');
+          const keywordNames = tmdbData.keywords
+            .map((k: any) => k.name)
+            .join(', ');
           systemPrompt += `关键词标签: ${keywordNames}\n`;
         }
 
@@ -567,7 +656,9 @@ ${config?.enableWebSearch && intent.needWebSearch ? '- 搜索最新影视资讯�
             const title = item.title || item.name;
             const date = item.release_date || item.first_air_date || '';
             const year = date ? new Date(date).getFullYear() : '';
-            const rating = item.vote_average ? item.vote_average.toFixed(1) : '';
+            const rating = item.vote_average
+              ? item.vote_average.toFixed(1)
+              : '';
 
             systemPrompt += `${index + 1}. ${title}`;
             if (year) systemPrompt += ` (${year})`;
@@ -581,7 +672,9 @@ ${config?.enableWebSearch && intent.needWebSearch ? '- 搜索最新影视资讯�
         systemPrompt += `2. 推荐时必须说明是"基于TMDB算法的推荐"，不要说"我推荐"或凭记忆推荐\n`;
         systemPrompt += `3. 如果TMDB相似列表为空，可以说"暂无TMDB相似推荐数据"，不要编造\n`;
 
-        console.log(`✅ TMDB详情已注入AI上下文 (keywords: ${tmdbData.keywords?.length || 0}, similar: ${tmdbData.similar?.length || 0})`);
+        console.log(
+          `✅ TMDB详情已注入AI上下文 (keywords: ${tmdbData.keywords?.length || 0}, similar: ${tmdbData.similar?.length || 0})`,
+        );
       } else {
         console.log(`⚠️ TMDB详情获取失败，继续使用基础上下文`);
       }

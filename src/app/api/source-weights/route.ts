@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
           // 缓存 5 分钟，权重配置不会频繁变化
           'Cache-Control': 'public, max-age=300, s-maxage=300',
         },
-      }
+      },
     );
   } catch (error) {
     console.error('获取源权重失败:', error);

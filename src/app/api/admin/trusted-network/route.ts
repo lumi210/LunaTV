@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   if (storageType === 'localstorage') {
     return NextResponse.json(
       { error: '不支持本地存储进行管理员配置' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -52,8 +52,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Get trusted network config error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
+      {
+        error: error instanceof Error ? error.message : 'Internal server error',
+      },
+      { status: 500 },
     );
   }
 }
@@ -66,7 +68,7 @@ export async function POST(request: NextRequest) {
   if (storageType === 'localstorage') {
     return NextResponse.json(
       { error: '不支持本地存储进行管理员配置' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -78,7 +80,10 @@ export async function POST(request: NextRequest) {
   }
 
   if (authInfo.username !== process.env.USERNAME) {
-    return NextResponse.json({ error: '权限不足，只有站长可以修改信任网络配置' }, { status: 403 });
+    return NextResponse.json(
+      { error: '权限不足，只有站长可以修改信任网络配置' },
+      { status: 403 },
+    );
   }
 
   try {
@@ -86,18 +91,27 @@ export async function POST(request: NextRequest) {
 
     // 验证配置数据
     if (typeof trustedNetworkConfig.enabled !== 'boolean') {
-      return NextResponse.json({ error: 'Invalid enabled value' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid enabled value' },
+        { status: 400 },
+      );
     }
 
     // 验证 IP 列表
     if (!Array.isArray(trustedNetworkConfig.trustedIPs)) {
-      return NextResponse.json({ error: 'trustedIPs必须是数组' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'trustedIPs必须是数组' },
+        { status: 400 },
+      );
     }
 
     // 验证每个 IP 格式
     for (const ip of trustedNetworkConfig.trustedIPs) {
       if (typeof ip !== 'string' || !isValidIPOrCIDR(ip.trim())) {
-        return NextResponse.json({ error: `无效的IP地址格式: ${ip}` }, { status: 400 });
+        return NextResponse.json(
+          { error: `无效的IP地址格式: ${ip}` },
+          { status: 400 },
+        );
       }
     }
 
@@ -107,7 +121,9 @@ export async function POST(request: NextRequest) {
     // 更新信任网络配置
     adminConfig.TrustedNetworkConfig = {
       enabled: trustedNetworkConfig.enabled,
-      trustedIPs: trustedNetworkConfig.trustedIPs.map((ip: string) => ip.trim()),
+      trustedIPs: trustedNetworkConfig.trustedIPs.map((ip: string) =>
+        ip.trim(),
+      ),
     };
 
     // 保存配置到数据库
@@ -123,7 +139,7 @@ export async function POST(request: NextRequest) {
         headers: {
           'Cache-Control': 'no-store',
         },
-      }
+      },
     );
     response.cookies.set('tn-version', Date.now().toString(), {
       httpOnly: false,
@@ -136,8 +152,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Save trusted network config error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
+      {
+        error: error instanceof Error ? error.message : 'Internal server error',
+      },
+      { status: 500 },
     );
   }
 }

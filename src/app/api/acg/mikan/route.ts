@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     if (!keyword || typeof keyword !== 'string') {
       return NextResponse.json(
         { error: '搜索关键词不能为空' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     if (!trimmedKeyword) {
       return NextResponse.json(
         { error: '搜索关键词不能为空' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     if (isNaN(pageNum) || pageNum < 1) {
       return NextResponse.json(
         { error: '页码必须是大于0的整数' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
           ...cached,
           fromCache: true,
           cacheSource: 'database',
-          cacheTimestamp: new Date().toISOString()
+          cacheTimestamp: new Date().toISOString(),
         });
       }
 
@@ -115,16 +115,17 @@ export async function POST(req: NextRequest) {
     const results = items.map((item: any) => {
       const title = pickText(item.title);
       const link = pickText(item.link);
-      const guid = pickText(item.guid) || link || `${title}-${pickText(item.torrent?.[0]?.pubDate)}`;
+      const guid =
+        pickText(item.guid) ||
+        link ||
+        `${title}-${pickText(item.torrent?.[0]?.pubDate)}`;
       const pubDate =
         pickText(item.pubDate) ||
         pickText(item.torrent?.[0]?.pubDate) ||
         pickText(item['dc:date']);
 
       const description =
-        pickText(item.description) ||
-        pickText(item['content:encoded']) ||
-        '';
+        pickText(item.description) || pickText(item['content:encoded']) || '';
 
       const torrentUrl =
         pickText(item.enclosure?.[0]?.$?.url) ||
@@ -136,10 +137,12 @@ export async function POST(req: NextRequest) {
       if (description) {
         const imgMatches = description.match(/src="([^"]+)"/g);
         if (imgMatches) {
-          images = imgMatches.map((match: string) => {
-            const urlMatch = match.match(/src="([^"]+)"/);
-            return urlMatch ? urlMatch[1] : '';
-          }).filter(Boolean);
+          images = imgMatches
+            .map((match: string) => {
+              const urlMatch = match.match(/src="([^"]+)"/);
+              return urlMatch ? urlMatch[1] : '';
+            })
+            .filter(Boolean);
         }
       }
 
@@ -164,7 +167,9 @@ export async function POST(req: NextRequest) {
     // 保存到缓存
     try {
       await db.setCache(cacheKey, responseData, ACG_CACHE_TIME);
-      console.log(`💾 Mikan 搜索结果已缓存: "${trimmedKeyword}" - ${results.length} 个结果, TTL: ${ACG_CACHE_TIME}s`);
+      console.log(
+        `💾 Mikan 搜索结果已缓存: "${trimmedKeyword}" - ${results.length} 个结果, TTL: ${ACG_CACHE_TIME}s`,
+      );
     } catch (cacheError) {
       console.warn('Mikan 搜索缓存保存失败:', cacheError);
     }
@@ -174,7 +179,7 @@ export async function POST(req: NextRequest) {
     console.error('Mikan 搜索失败:', error);
     return NextResponse.json(
       { error: error.message || '搜索失败' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -3,7 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthInfoFromCookie } from '@/lib/auth';
 import { getAvailableApiSites, getCacheTime } from '@/lib/config';
 import { getDetailFromApi } from '@/lib/downstream';
-import { recordRequest, getDbQueryCount, resetDbQueryCount } from '@/lib/performance-monitor';
+import {
+  recordRequest,
+  getDbQueryCount,
+  resetDbQueryCount,
+} from '@/lib/performance-monitor';
 
 export const runtime = 'nodejs';
 
@@ -81,7 +85,10 @@ export async function GET(request: NextRequest) {
 
     if (!apiSite) {
       const errorResponse = { error: '无效的API来源' };
-      const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+      const errorSize = Buffer.byteLength(
+        JSON.stringify(errorResponse),
+        'utf8',
+      );
 
       recordRequest({
         timestamp: startTime,
@@ -89,7 +96,8 @@ export async function GET(request: NextRequest) {
         path: '/api/detail',
         statusCode: 400,
         duration: Date.now() - startTime,
-        memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+        memoryUsed:
+          (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
         dbQueries: getDbQueryCount(),
         requestSize: 0,
         responseSize: errorSize,
@@ -103,12 +111,14 @@ export async function GET(request: NextRequest) {
 
     // 视频源详情默认不缓存，确保集数信息实时更新
     // 缓存原本是为了豆瓣/Bangumi详情设计的，视频源应该实时获取
-    console.log(`获取视频详情: ${apiSite.name} - ${id}，不设置缓存确保集数实时更新`);
+    console.log(
+      `获取视频详情: ${apiSite.name} - ${id}，不设置缓存确保集数实时更新`,
+    );
 
     const responseHeaders: Record<string, string> = {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
+      Pragma: 'no-cache',
+      Expires: '0',
     };
 
     const responseSize = Buffer.byteLength(JSON.stringify(result), 'utf8');

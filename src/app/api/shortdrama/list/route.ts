@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getCacheTime, getConfig } from '@/lib/config';
-import { recordRequest, getDbQueryCount, resetDbQueryCount } from '@/lib/performance-monitor';
+import {
+  recordRequest,
+  getDbQueryCount,
+  resetDbQueryCount,
+} from '@/lib/performance-monitor';
 import { DEFAULT_USER_AGENT } from '@/lib/user-agent';
 
 // 强制动态路由，禁用所有缓存
@@ -13,18 +17,14 @@ export const fetchCache = 'force-no-store';
 const FALLBACK_API_BASE = 'https://api.r2afosne.dpdns.org';
 
 // 从单个短剧源获取数据（通过分类名称查找）
-async function fetchListFromSource(
-  api: string,
-  page: number,
-  size: number
-) {
+async function fetchListFromSource(api: string, page: number, size: number) {
   // Step 1: 获取分类列表，找到"短剧"分类的ID
   const listUrl = `${api}?ac=list`;
 
   const listResponse = await fetch(listUrl, {
     headers: {
       'User-Agent': DEFAULT_USER_AGENT,
-      'Accept': 'application/json',
+      Accept: 'application/json',
     },
     signal: AbortSignal.timeout(10000),
   });
@@ -37,8 +37,8 @@ async function fetchListFromSource(
   const categories = listData.class || [];
 
   // 查找"短剧"分类（只要包含"短剧"两个字即可）
-  const shortDramaCategory = categories.find((cat: any) =>
-    cat.type_name && cat.type_name.includes('短剧')
+  const shortDramaCategory = categories.find(
+    (cat: any) => cat.type_name && cat.type_name.includes('短剧'),
   );
 
   if (!shortDramaCategory) {
@@ -55,7 +55,7 @@ async function fetchListFromSource(
   const response = await fetch(apiUrl, {
     headers: {
       'User-Agent': DEFAULT_USER_AGENT,
-      'Accept': 'application/json',
+      Accept: 'application/json',
     },
     signal: AbortSignal.timeout(10000),
   });
@@ -92,7 +92,7 @@ async function fetchListFromSource(
 async function fetchListFromFallbackApi(
   categoryId: number,
   page: number,
-  size: number
+  size: number,
 ) {
   console.log('🔄 尝试备用API列表: 乱短剧API /vod/list');
 
@@ -100,8 +100,9 @@ async function fetchListFromFallbackApi(
 
   const response = await fetch(apiUrl, {
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      'Accept': 'application/json',
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      Accept: 'application/json',
     },
     signal: AbortSignal.timeout(10000),
   });
@@ -121,7 +122,9 @@ async function fetchListFromFallbackApi(
     cover: item.cover || '',
     update_time: item.update_time || new Date().toISOString(),
     score: parseFloat(item.score) || 0,
-    episode_count: parseInt(String(item.episode_count || '1').replace(/[^\d]/g, '') || '1'),
+    episode_count: parseInt(
+      String(item.episode_count || '1').replace(/[^\d]/g, '') || '1',
+    ),
     description: item.description || '',
     author: item.author || '',
     backdrop: item.cover || '',
@@ -139,14 +142,14 @@ async function fetchListFromFallbackApi(
 async function getShortDramaListInternal(
   category: number,
   page = 1,
-  size = 20
+  size = 20,
 ) {
   try {
     const config = await getConfig();
 
     // 筛选出所有启用的短剧源
     const shortDramaSources = config.SourceConfig.filter(
-      source => source.type === 'shortdrama' && !source.disabled
+      (source) => source.type === 'shortdrama' && !source.disabled,
     );
 
     // 如果没有配置短剧源，使用默认源
@@ -154,15 +157,15 @@ async function getShortDramaListInternal(
       return await fetchListFromSource(
         'https://wwzy.tv/api.php/provide/vod',
         page,
-        size
+        size,
       );
     }
 
     // 有配置短剧源，聚合所有源的数据
     const results = await Promise.allSettled(
-      shortDramaSources.map(source => {
+      shortDramaSources.map((source) => {
         return fetchListFromSource(source.api, page, size);
-      })
+      }),
     );
 
     // 合并所有成功的结果
@@ -178,12 +181,13 @@ async function getShortDramaListInternal(
 
     // 去重
     const uniqueItems = Array.from(
-      new Map(allItems.map(item => [item.name, item])).values()
+      new Map(allItems.map((item) => [item.name, item])).values(),
     );
 
     // 按更新时间排序
-    uniqueItems.sort((a, b) =>
-      new Date(b.update_time).getTime() - new Date(a.update_time).getTime()
+    uniqueItems.sort(
+      (a, b) =>
+        new Date(b.update_time).getTime() - new Date(a.update_time).getTime(),
     );
 
     return {
@@ -197,7 +201,7 @@ async function getShortDramaListInternal(
       return await fetchListFromSource(
         'https://wwzy.tv/api.php/provide/vod',
         page,
-        size
+        size,
       );
     } catch (fallbackError) {
       console.error('默认源也失败:', fallbackError);
@@ -232,12 +236,15 @@ export async function GET(request: NextRequest) {
       size,
       userAgent: request.headers.get('user-agent'),
       referer: request.headers.get('referer'),
-      url: request.url
+      url: request.url,
     });
 
     if (!categoryId) {
       const errorResponse = { error: '缺少必要参数: categoryId' };
-      const responseSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+      const responseSize = Buffer.byteLength(
+        JSON.stringify(errorResponse),
+        'utf8',
+      );
 
       recordRequest({
         timestamp: startTime,
@@ -245,7 +252,8 @@ export async function GET(request: NextRequest) {
         path: '/api/shortdrama/list',
         statusCode: 400,
         duration: Date.now() - startTime,
-        memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+        memoryUsed:
+          (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
         dbQueries: getDbQueryCount(),
         requestSize: 0,
         responseSize,
@@ -260,7 +268,10 @@ export async function GET(request: NextRequest) {
 
     if (isNaN(category) || isNaN(pageNum) || isNaN(pageSize)) {
       const errorResponse = { error: '参数格式错误' };
-      const responseSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+      const responseSize = Buffer.byteLength(
+        JSON.stringify(errorResponse),
+        'utf8',
+      );
 
       recordRequest({
         timestamp: startTime,
@@ -268,7 +279,8 @@ export async function GET(request: NextRequest) {
         path: '/api/shortdrama/list',
         statusCode: 400,
         duration: Date.now() - startTime,
-        memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+        memoryUsed:
+          (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
         dbQueries: getDbQueryCount(),
         requestSize: 0,
         responseSize,
@@ -283,12 +295,14 @@ export async function GET(request: NextRequest) {
     console.log('✅ [SHORTDRAMA API] 返回数据:', {
       timestamp: new Date().toISOString(),
       count: result.list?.length || 0,
-      firstItem: result.list?.[0] ? {
-        id: result.list[0].id,
-        name: result.list[0].name,
-        update_time: result.list[0].update_time
-      } : null,
-      hasMore: result.hasMore
+      firstItem: result.list?.[0]
+        ? {
+            id: result.list[0].id,
+            name: result.list[0].name,
+            update_time: result.list[0].update_time,
+          }
+        : null,
+      hasMore: result.hasMore,
     });
 
     // 设置与网页端一致的缓存策略（lists: 2小时）
@@ -298,13 +312,22 @@ export async function GET(request: NextRequest) {
 
     // 2小时 = 7200秒（与网页端SHORTDRAMA_CACHE_EXPIRE.lists一致）
     const cacheTime = 7200;
-    response.headers.set('Cache-Control', `public, max-age=${cacheTime}, s-maxage=${cacheTime}`);
+    response.headers.set(
+      'Cache-Control',
+      `public, max-age=${cacheTime}, s-maxage=${cacheTime}`,
+    );
     response.headers.set('CDN-Cache-Control', `public, s-maxage=${cacheTime}`);
-    response.headers.set('Vercel-CDN-Cache-Control', `public, s-maxage=${cacheTime}`);
+    response.headers.set(
+      'Vercel-CDN-Cache-Control',
+      `public, s-maxage=${cacheTime}`,
+    );
 
     // 调试信息
     response.headers.set('X-Cache-Duration', '2hour');
-    response.headers.set('X-Cache-Expires-At', new Date(Date.now() + cacheTime * 1000).toISOString());
+    response.headers.set(
+      'X-Cache-Expires-At',
+      new Date(Date.now() + cacheTime * 1000).toISOString(),
+    );
     response.headers.set('X-Debug-Timestamp', new Date().toISOString());
 
     // Vary头确保不同设备有不同缓存
@@ -330,7 +353,10 @@ export async function GET(request: NextRequest) {
     console.error('获取短剧列表失败:', error);
 
     const errorResponse = { error: '服务器内部错误' };
-    const responseSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+    const responseSize = Buffer.byteLength(
+      JSON.stringify(errorResponse),
+      'utf8',
+    );
 
     recordRequest({
       timestamp: startTime,

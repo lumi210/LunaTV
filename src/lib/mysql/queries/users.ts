@@ -132,9 +132,7 @@ export async function deleteUser(username: string): Promise<boolean> {
 }
 
 export async function getAllUsers(): Promise<UserRow[]> {
-  return executeQuery<UserRow>(
-    'SELECT * FROM users ORDER BY created_at DESC',
-  );
+  return executeQuery<UserRow>('SELECT * FROM users ORDER BY created_at DESC');
 }
 
 export async function getUserCount(): Promise<number> {

@@ -18,7 +18,10 @@ export function initFetchInterceptor() {
   }
 
   // 替换全局 fetch
-  global.fetch = async (url: RequestInfo | URL, options?: RequestInit): Promise<Response> => {
+  global.fetch = async (
+    url: RequestInfo | URL,
+    options?: RequestInit,
+  ): Promise<Response> => {
     const startTime = Date.now();
     const urlString = url.toString();
 
@@ -52,7 +55,9 @@ export function initFetchInterceptor() {
         statusCode: response.status,
       });
 
-      console.log(`🌐 [External] ${options?.method || 'GET'} ${urlString} - ${response.status} - ${(responseSize / 1024).toFixed(2)} KB`);
+      console.log(
+        `🌐 [External] ${options?.method || 'GET'} ${urlString} - ${response.status} - ${(responseSize / 1024).toFixed(2)} KB`,
+      );
 
       return response;
     } catch (error) {

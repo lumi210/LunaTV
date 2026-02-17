@@ -28,8 +28,11 @@ const BackToTopButton = memo(function BackToTopButton({
       style={{
         position: 'fixed',
         right: '1.5rem',
-        bottom: typeof window !== 'undefined' && window.innerWidth < 768 ? '5rem' : '1.5rem',
-        left: 'auto'
+        bottom:
+          typeof window !== 'undefined' && window.innerWidth < 768
+            ? '5rem'
+            : '1.5rem',
+        left: 'auto',
       }}
       aria-label='返回顶部'
     >

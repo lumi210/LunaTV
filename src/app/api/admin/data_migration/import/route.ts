@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     if (storageType === 'localstorage') {
       return NextResponse.json(
         { error: '不支持本地存储进行数据迁移' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -32,7 +32,10 @@ export async function POST(req: NextRequest) {
 
     // 检查用户权限（只有站长可以导入数据）
     if (authInfo.username !== process.env.USERNAME) {
-      return NextResponse.json({ error: '权限不足，只有站长可以导入数据' }, { status: 401 });
+      return NextResponse.json(
+        { error: '权限不足，只有站长可以导入数据' },
+        { status: 401 },
+      );
     }
 
     // 解析表单数据
@@ -56,7 +59,10 @@ export async function POST(req: NextRequest) {
     try {
       decryptedData = SimpleCrypto.decrypt(encryptedData, password);
     } catch (error) {
-      return NextResponse.json({ error: '解密失败，请检查密码是否正确' }, { status: 400 });
+      return NextResponse.json(
+        { error: '解密失败，请检查密码是否正确' },
+        { status: 400 },
+      );
     }
 
     // 解压缩数据
@@ -73,7 +79,11 @@ export async function POST(req: NextRequest) {
     }
 
     // 验证数据格式
-    if (!importData.data || !importData.data.adminConfig || !importData.data.userData) {
+    if (
+      !importData.data ||
+      !importData.data.adminConfig ||
+      !importData.data.userData
+    ) {
       return NextResponse.json({ error: '备份文件格式无效' }, { status: 400 });
     }
 
@@ -95,7 +105,7 @@ export async function POST(req: NextRequest) {
           user.userInfoV2.role || 'user',
           user.userInfoV2.tags,
           user.userInfoV2.oidcSub, // 恢复 OIDC 绑定
-          user.userInfoV2.enabledApis
+          user.userInfoV2.enabledApis,
         );
       } else if (user.password) {
         // 兼容旧版本备份（V1用户）
@@ -106,7 +116,9 @@ export async function POST(req: NextRequest) {
 
     // 步骤2：导入管理员配置并进行自检查
     // 此时数据库中已有用户，configSelfCheck 可以正确获取用户列表并保留备份中的用户配置
-    importData.data.adminConfig = await configSelfCheck(importData.data.adminConfig);
+    importData.data.adminConfig = await configSelfCheck(
+      importData.data.adminConfig,
+    );
     await db.saveAdminConfig(importData.data.adminConfig);
     await setCachedConfig(importData.data.adminConfig);
 
@@ -130,7 +142,8 @@ export async function POST(req: NextRequest) {
 
       // 导入搜索历史
       if (user.searchHistory && Array.isArray(user.searchHistory)) {
-        for (const keyword of user.searchHistory.reverse()) { // 反转以保持顺序
+        for (const keyword of user.searchHistory.reverse()) {
+          // 反转以保持顺序
           await db.addSearchHistory(username, keyword);
         }
       }
@@ -165,14 +178,16 @@ export async function POST(req: NextRequest) {
       message: '数据导入成功',
       importedUsers: Object.keys(userData).length,
       timestamp: importData.timestamp,
-      serverVersion: typeof importData.serverVersion === 'string' ? importData.serverVersion : '未知版本'
+      serverVersion:
+        typeof importData.serverVersion === 'string'
+          ? importData.serverVersion
+          : '未知版本',
     });
-
   } catch (error) {
     console.error('数据导入失败:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : '导入失败' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

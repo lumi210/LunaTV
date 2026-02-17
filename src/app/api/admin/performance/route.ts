@@ -6,7 +6,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthInfoFromCookie } from '@/lib/auth';
-import { getRecentMetrics, getRecentRequests, getCurrentStatus, clearCache, startAutoCollection } from '@/lib/performance-monitor';
+import {
+  getRecentMetrics,
+  getRecentRequests,
+  getCurrentStatus,
+  clearCache,
+  startAutoCollection,
+} from '@/lib/performance-monitor';
 import { initFetchInterceptor } from '@/lib/fetch-interceptor';
 import { getExternalTrafficStats } from '@/lib/external-traffic-monitor';
 
@@ -56,10 +62,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('获取性能数据失败:', error);
-    return NextResponse.json(
-      { error: '获取性能数据失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '获取性能数据失败' }, { status: 500 });
   }
 }
 
@@ -89,9 +92,6 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error) {
     console.error('清空性能数据失败:', error);
-    return NextResponse.json(
-      { error: '清空性能数据失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '清空性能数据失败' }, { status: 500 });
   }
 }

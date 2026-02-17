@@ -19,34 +19,42 @@ https://your-domain.com/tvbox
 LunaTV 提供 4 种配置模式，适应不同使用场景：
 
 #### 📊 **标准模式**（推荐）
+
 ```
 https://your-domain.com/api/tvbox?format=json
 ```
+
 - 包含完整配置（IJK 优化、广告过滤、DoH DNS）
 - 支持硬解码和软解码配置
 - 适合大多数用户使用
 
 #### 🔒 **精简模式**
+
 ```
 https://your-domain.com/api/tvbox?format=json&mode=safe
 ```
+
 - 仅包含核心配置字段
 - 提高 TVBox 兼容性
 - 遇到兼容性问题时使用
 
 #### ⚡ **快速模式**（新增）
+
 ```
 https://your-domain.com/api/tvbox?format=json&mode=fast
 ```
+
 - **优化源切换速度**，减少卡顿
 - 移除 timeout/retry 配置避免等待
 - 解决 SSL handshake 错误
 - **适合频繁切换源的用户**
 
 #### 🎬 **影视仓模式**
+
 ```
 https://your-domain.com/api/tvbox?format=json&mode=yingshicang
 ```
+
 - 专为影视仓优化
 - 包含播放规则和兼容性修复
 - 支持量子、非凡等资源站
@@ -56,17 +64,21 @@ https://your-domain.com/api/tvbox?format=json&mode=yingshicang
 支持两种格式：
 
 **JSON 格式（推荐）：**
+
 ```
 ?format=json
 ```
+
 - 标准 JSON 配置，便于调试
 - TVBox 主流分支支持
 - 适合大多数场景
 
 **Base64 格式：**
+
 ```
 ?format=base64
 ```
+
 - Base64 编码的配置
 - 适合某些特殊环境
 - 部分 TVBox 分支需要
@@ -97,12 +109,14 @@ https://your-domain.com/api/tvbox?format=json&token=GLOBAL_TOKEN
 **新功能**：管理员可以为每个用户生成独立的 TVBox token，并配置该用户可访问的视频源。
 
 **优势：**
+
 - 🎯 **细粒度权限控制**：不同用户可访问不同的视频源
 - 🔒 **安全性更高**：每个用户拥有独立 token，泄露影响范围更小
 - 📊 **使用追踪**：通过 token 可以识别访问来源
 - 🔄 **灵活管理**：可随时为单个用户重新生成 token 或调整源权限
 
 **配置步骤：**
+
 1. 管理员登录后台，进入 **用户管理** 页面
 2. 找到目标用户，点击 **TVBox Token** 管理按钮
 3. 点击 **生成 Token** 为用户创建专属 token
@@ -110,11 +124,13 @@ https://your-domain.com/api/tvbox?format=json&token=GLOBAL_TOKEN
 5. 保存配置
 
 **用户使用：**
+
 ```
 https://your-domain.com/api/tvbox?format=json&token=USER_SPECIFIC_TOKEN
 ```
 
 **降级机制：**
+
 - 如果用户有专属 token，则使用用户配置的源权限
 - 如果用户没有专属 token，则回退使用全局 token（访问所有源）
 
@@ -142,6 +158,7 @@ Spider JAR 是 TVBox 用于解析视频源的核心组件（约 276KB），通�
 **仅适用于部署在 Vercel 的用户**，LunaTV 自动启用全球 CDN 加速：
 
 **优势：**
+
 - ✅ **全球加速** - 用户从最近的 CDN 节点下载（0.5秒 vs 2秒）
 - ✅ **减轻服务器负载** - 99% 的流量走 CDN，不占用服务器带宽
 - ✅ **自动更新** - 每天凌晨 1 点通过 Cron 自动更新
@@ -149,6 +166,7 @@ Spider JAR 是 TVBox 用于解析视频源的核心组件（约 276KB），通�
 - ✅ **零配置** - 配置 Token 后完全自动，无需手动维护
 
 **工作原理：**
+
 ```
 首次部署 → 用户请求 → 服务器从 GitHub 拉取 → 异步上传到 Vercel Blob CDN
 后续请求 → 用户直接从 CDN 下载 ✅ 超快！
@@ -158,6 +176,7 @@ Spider JAR 是 TVBox 用于解析视频源的核心组件（约 276KB），通�
 **配置步骤（Vercel 用户）：**
 
 1. 在 Vercel 项目设置中添加环境变量：
+
    ```
    BLOB_READ_WRITE_TOKEN=<your-token>
    ```
@@ -171,6 +190,7 @@ Spider JAR 是 TVBox 用于解析视频源的核心组件（约 276KB），通�
 **Cron 定时任务说明：**
 
 LunaTV 的 Cron 任务（每天凌晨 1 点）会自动执行以下操作：
+
 - 🕷️ **Spider JAR 更新** - 从 GitHub 拉取最新版本并上传到 Blob CDN（仅 Vercel + Token）
 - 📺 **直播频道刷新** - 更新所有直播源的频道数量
 - 📊 **播放记录更新** - 刷新用户的播放记录和收藏（检查剧集更新）
@@ -178,11 +198,13 @@ LunaTV 的 Cron 任务（每天凌晨 1 点）会自动执行以下操作：
 - 🔄 **配置同步** - 同步配置订阅（如果启用）
 
 **注意事项：**
+
 - ⚠️ 如果未配置 `BLOB_READ_WRITE_TOKEN`，Spider JAR 更新会自动跳过（不影响其他功能）
 - ✅ Cron 任务配置在 `vercel.json` 中，默认每天 1:00 AM UTC 执行
 - ✅ 可以通过访问 `/api/cron` 手动触发（需要管理员权限）
 
 **非 Vercel 用户：**
+
 - ✅ 自动降级到服务器代理模式
 - ✅ 所有功能正常工作
 - ✅ 无需任何配置
@@ -194,12 +216,14 @@ LunaTV 的 Cron 任务（每天凌晨 1 点）会自动执行以下操作：
 LunaTV 默认启用智能搜索代理，解决 TVBox 搜索结果不精确的问题。
 
 **功能特点：**
+
 - ✅ **智能排序** - 相关度高的结果优先显示
 - ✅ **成人内容过滤** - 自动过滤敏感内容（可控制）
 - ✅ **严格匹配模式** - 只返回高度相关的结果
 - ✅ **无感知** - TVBox 端无需任何配置，自动生效
 
 **工作原理：**
+
 1. TVBox 发送搜索请求到视频源
 2. LunaTV 拦截请求，从上游获取结果
 3. 智能排序：完全匹配 > 开头匹配 > 包含匹配 > 模糊匹配
@@ -209,6 +233,7 @@ LunaTV 默认启用智能搜索代理，解决 TVBox 搜索结果不精确的问
 **成人内容过滤：**
 
 默认启用，基于 29+ 敏感关键词过滤：
+
 - 伦理片、福利、里番动漫、制服诱惑等
 - 被标记为成人内容的源会被完全过滤
 - 分类名称包含敏感词的结果会被移除
@@ -250,12 +275,14 @@ https://your-domain.com/api/tvbox?strict=1
 ```
 
 **参数优先级：**
+
 1. 路径前缀 `/adult/` → 显示成人内容
 2. URL 参数 `?filter=off` → 禁用过滤
 3. URL 参数 `?adult=1` → 显示成人内容
 4. 全局配置 `DisableYellowFilter` → 默认策略
 
 **使用场景：**
+
 - **家庭模式**：使用默认配置，自动过滤不良内容
 - **OrionTV**：使用 `/adult/` 路径前缀控制
 - **多设备**：不同设备使用不同 URL，灵活控制
@@ -266,6 +293,7 @@ https://your-domain.com/api/tvbox?strict=1
 LunaTV 支持通过 Cloudflare Worker 为视频源 API 提供全球 CDN 加速。
 
 **功能特点：**
+
 - ✅ **全球加速** - 利用 Cloudflare 全球 CDN 节点加速源站访问
 - ✅ **智能替换** - 自动检测并替换源中已有的旧代理地址
 - ✅ **统一管理** - 管理面板一键启用，所有源自动应用
@@ -295,6 +323,7 @@ LunaTV 支持通过 Cloudflare Worker 为视频源 API 提供全球 CDN 加速�
 4. Worker 自动转发所有参数到真实源：`https://lovedan.net/api.php/provide/vod?ac=list&pg=1`
 
 **智能处理：**
+
 - 🔄 **自动去重**：如果源地址已包含代理（如 `?url=`），自动提取真实地址并替换为新代理
 - 🎯 **唯一路径**：为每个源生成唯一的 `/p/{sourceId}` 路径，避免 TVBox 将所有源识别为同一个
 - 📦 **参数转发**：完整转发 TVBox 的所有 API 参数（`ac`, `ids`, `pg` 等）
@@ -302,11 +331,13 @@ LunaTV 支持通过 Cloudflare Worker 为视频源 API 提供全球 CDN 加速�
 **示例：**
 
 假设你有一个源已经配置了旧代理：
+
 ```
 https://old-proxy.com/?url=https://lovedan.net/api.php/provide/vod
 ```
 
 启用新代理后，系统会自动：
+
 1. 检测到 `?url=` 参数
 2. 提取真实地址：`https://lovedan.net/api.php/provide/vod`
 3. 替换为新代理：`https://corsapi.smone.workers.dev/p/lovedan?url=https://lovedan.net/api.php/provide/vod`
@@ -318,12 +349,14 @@ https://old-proxy.com/?url=https://lovedan.net/api.php/provide/vod
 LunaTV 自动管理 spider jar 文件，确保最佳可用性：
 
 **工作原理：**
+
 1. 后端自动探测多个 jar 源（gitcode、gitee、GitHub 等）
 2. 成功时返回远程公网 URL（减轻服务器负载）
 3. 失败时随机选择备用公网地址（避免单点失败）
 4. 6 小时缓存，真实 MD5 验证
 
 **优势：**
+
 - ✅ 自动选择最快的 jar 源
 - ✅ SSL 错误自动降级
 - ✅ 100% 避免 404 错误
@@ -331,6 +364,7 @@ LunaTV 自动管理 spider jar 文件，确保最佳可用性：
 
 **诊断信息：**
 配置中包含 `spider_*` 字段供调试：
+
 ```json
 {
   "spider_url": "实际下载的源地址",
@@ -346,23 +380,24 @@ LunaTV 自动管理 spider jar 文件，确保最佳可用性：
 
 ### 📋 配置模式对比
 
-| 功能 | 标准模式 | 精简模式 | 快速模式 | 影视仓模式 |
-|------|---------|---------|---------|-----------|
-| **IJK 配置** | ✅ 完整 | ❌ 无 | ❌ 无 | ✅ 完整 |
-| **DoH DNS** | ✅ 有 | ❌ 无 | ❌ 无 | ❌ 无 |
-| **广告过滤** | ✅ 有 | ❌ 无 | ❌ 无 | ✅ 有 |
-| **超时配置** | ✅ 10s/15s | ❌ 无 | ❌ **移除** | ❌ 无 |
-| **重试配置** | ✅ 1-2次 | ❌ 无 | ❌ **移除** | ❌ 无 |
-| **播放规则** | ❌ 无 | ❌ 无 | ❌ 无 | ✅ 完整 |
-| **首页内容** | 默认 | 默认 | **15条** | 20条 |
-| **解析接口** | 4个 | 1个 | 2个（极速） | 4个 |
-| **适用场景** | 日常使用 | 兼容性问题 | **频繁切换源** | 影视仓专用 |
+| 功能         | 标准模式   | 精简模式   | 快速模式       | 影视仓模式 |
+| ------------ | ---------- | ---------- | -------------- | ---------- |
+| **IJK 配置** | ✅ 完整    | ❌ 无      | ❌ 无          | ✅ 完整    |
+| **DoH DNS**  | ✅ 有      | ❌ 无      | ❌ 无          | ❌ 无      |
+| **广告过滤** | ✅ 有      | ❌ 无      | ❌ 无          | ✅ 有      |
+| **超时配置** | ✅ 10s/15s | ❌ 无      | ❌ **移除**    | ❌ 无      |
+| **重试配置** | ✅ 1-2次   | ❌ 无      | ❌ **移除**    | ❌ 无      |
+| **播放规则** | ❌ 无      | ❌ 无      | ❌ 无          | ✅ 完整    |
+| **首页内容** | 默认       | 默认       | **15条**       | 20条       |
+| **解析接口** | 4个        | 1个        | 2个（极速）    | 4个        |
+| **适用场景** | 日常使用   | 兼容性问题 | **频繁切换源** | 影视仓专用 |
 
 ### 🎯 Sites 配置优化
 
 根据 API 类型自动配置最佳参数：
 
 **MacCMS 源（type 0/1）：**
+
 ```json
 {
   "timeout": 10000,
@@ -377,6 +412,7 @@ LunaTV 自动管理 spider jar 文件，确保最佳可用性：
 ```
 
 **CSP 源（type 3）：**
+
 ```json
 {
   "timeout": 15000,
@@ -420,11 +456,13 @@ LunaTV 自动管理 spider jar 文件，确保最佳可用性：
 支持硬解码和软解码两种模式：
 
 **硬解码（推荐）：**
+
 - `mediacodec: 1` - 启用硬件加速
 - `mediacodec-auto-rotate: 1` - 自动旋转
 - `mediacodec-handle-resolution-change: 1` - 处理分辨率变化
 
 **软解码：**
+
 - `mediacodec: 0` - 禁用硬件加速
 - 适合兼容性问题场景
 
@@ -445,16 +483,16 @@ https://your-domain.com/api/tvbox?format=json&mode=yingshicang&forceSpiderRefres
 
 ### 参数说明
 
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|-------|------|
-| `format` | string | `json` | 返回格式：`json` 或 `base64` |
-| `mode` | string | `standard` | 配置模式：`standard`/`safe`/`fast`/`yingshicang` |
-| `token` | string | - | 访问 token（启用认证时必需） |
-| `forceSpiderRefresh` | string | `0` | 强制刷新 spider 缓存：`1` 启用 |
-| `adult` | string | - | 成人内容控制：`1`/`true` 显示，`0`/`false` 隐藏 |
-| `filter` | string | - | 过滤控制：`on`/`enable` 启用，`off`/`disable` 禁用 |
-| `proxy` | string | - | 智能搜索代理：`off`/`disable` 禁用（默认启用） |
-| `strict` | string | `0` | 严格匹配模式：`1` 启用（只返回高度相关结果） |
+| 参数                 | 类型   | 默认值     | 说明                                               |
+| -------------------- | ------ | ---------- | -------------------------------------------------- |
+| `format`             | string | `json`     | 返回格式：`json` 或 `base64`                       |
+| `mode`               | string | `standard` | 配置模式：`standard`/`safe`/`fast`/`yingshicang`   |
+| `token`              | string | -          | 访问 token（启用认证时必需）                       |
+| `forceSpiderRefresh` | string | `0`        | 强制刷新 spider 缓存：`1` 启用                     |
+| `adult`              | string | -          | 成人内容控制：`1`/`true` 显示，`0`/`false` 隐藏    |
+| `filter`             | string | -          | 过滤控制：`on`/`enable` 启用，`off`/`disable` 禁用 |
+| `proxy`              | string | -          | 智能搜索代理：`off`/`disable` 禁用（默认启用）     |
+| `strict`             | string | `0`        | 严格匹配模式：`1` 启用（只返回高度相关结果）       |
 
 ## 🔄 配置更新机制
 
@@ -470,6 +508,7 @@ https://your-domain.com/api/tvbox?format=json&mode=yingshicang&forceSpiderRefres
 在 TVBox 中：设置 → 配置地址 → 刷新
 
 强制刷新 spider jar：
+
 ```
 ?forceSpiderRefresh=1
 ```
@@ -479,21 +518,25 @@ https://your-domain.com/api/tvbox?format=json&mode=yingshicang&forceSpiderRefres
 ### 🎯 智能搜索相关
 
 **问题：搜索结果太少**
+
 - 可能启用了严格匹配模式，移除 `?strict=1` 参数
 - 检查是否被成人内容过滤影响，尝试 `?filter=off`
 - 确认原始源有搜索结果
 
 **问题：搜索结果包含不相关内容**
+
 - 启用严格匹配模式：`?strict=1`
 - 智能排序会自动将相关度高的结果置顶
 - 检查搜索关键词是否过于宽泛
 
 **问题：想查看被过滤的内容**
+
 - 添加 `?adult=1` 参数
 - 或使用 `?filter=off` 完全禁用过滤
 - 注意：此设置会影响所有搜索结果
 
 **问题：搜索速度慢**
+
 - 智能搜索代理需要处理时间（通常 < 1秒）
 - 如需直连原始 API，使用 `?proxy=off`（不推荐）
 - 检查网络连接和上游源响应速度
@@ -501,11 +544,13 @@ https://your-domain.com/api/tvbox?format=json&mode=yingshicang&forceSpiderRefres
 ### ⚡ 快速模式相关
 
 **问题：源切换仍然卡顿**
+
 - 确认使用了 `?mode=fast` 参数
 - 检查网络连接稳定性
 - 尝试重新导入配置
 
 **问题：SSL handshake 错误**
+
 - 快速模式已优化请求头（Connection: close）
 - Spider jar 使用国内稳定源优先
 - 15 秒超时避免 SSL 问题
@@ -513,16 +558,19 @@ https://your-domain.com/api/tvbox?format=json&mode=yingshicang&forceSpiderRefres
 ### 🔐 安全相关
 
 **问题：401 Unauthorized**
+
 - 检查 token 是否正确
 - 确认 token 已包含在 URL 中
 - 联系管理员获取有效 token
 
 **问题：403 Forbidden**
+
 - IP 不在白名单中
 - 联系管理员添加 IP 到白名单
 - 支持 CIDR 格式（如 192.168.1.0/24）
 
 **问题：429 Too Many Requests**
+
 - 访问频率超限
 - 等待 1 分钟后重试
 - 降低刷新频率
@@ -530,11 +578,13 @@ https://your-domain.com/api/tvbox?format=json&mode=yingshicang&forceSpiderRefres
 ### 🕷️ Spider Jar 相关
 
 **问题：Spider 不可用**
+
 - 系统会自动切换备用地址
 - 检查 `spider_success` 字段
 - 使用 `?forceSpiderRefresh=1` 强制刷新
 
 **问题：诊断显示 "降级（使用 fallback jar）"**
+
 - 所有远程源暂时不可用
 - 系统已提供最小有效 jar 保底
 - 稍后自动恢复正常
@@ -542,16 +592,19 @@ https://your-domain.com/api/tvbox?format=json&mode=yingshicang&forceSpiderRefres
 ### 📺 TVBox 相关
 
 **问题：配置导入失败**
+
 - 检查网络连接
 - 尝试不同 format（json/base64）
 - 确认 LunaTV 服务器可访问
 
 **问题：源站不显示**
+
 - 检查源站是否被禁用
 - 确认 API 地址格式正确
 - 刷新 TVBox 配置
 
 **问题：视频无法播放**
+
 - 检查原始源站可用性
 - 尝试其他解析接口
 - 使用快速模式减少超时
@@ -565,6 +618,7 @@ GET /api/tvbox/diagnose?token=YOUR_TOKEN
 ```
 
 **返回信息：**
+
 ```json
 {
   "ok": true,

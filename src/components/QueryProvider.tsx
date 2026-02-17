@@ -17,7 +17,11 @@ import type * as React from 'react';
  * - 在 layout.tsx 中包裹 children
  * - 所有子组件都可以使用 useQuery/useMutation hooks
  */
-export default function QueryProvider({ children }: { children: React.ReactNode }) {
+export default function QueryProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   // 获取 QueryClient 实例（浏览器端单例，服务端每次新建）
   const queryClient = getQueryClient();
 

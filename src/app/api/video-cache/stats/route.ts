@@ -11,10 +11,13 @@ export async function GET() {
     const storageType = process.env.NEXT_PUBLIC_STORAGE_TYPE;
 
     if (storageType !== 'kvrocks') {
-      return NextResponse.json({
-        code: 400,
-        message: '当前存储类型不支持视频缓存',
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          code: 400,
+          message: '当前存储类型不支持视频缓存',
+        },
+        { status: 400 },
+      );
     }
 
     const stats = await getCacheStats();
@@ -33,10 +36,13 @@ export async function GET() {
     });
   } catch (error) {
     console.error('[VideoCache] 获取统计失败:', error);
-    return NextResponse.json({
-      code: 500,
-      message: '获取统计失败',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        code: 500,
+        message: '获取统计失败',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 },
+    );
   }
 }

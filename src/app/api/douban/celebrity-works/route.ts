@@ -3,7 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCacheTime } from '@/lib/config';
 import { db } from '@/lib/db';
 import { fetchDoubanWithVerification } from '@/lib/douban-anti-crawler';
-import { getRandomUserAgentWithInfo, getSecChUaHeaders } from '@/lib/user-agent';
+import {
+  getRandomUserAgentWithInfo,
+  getSecChUaHeaders,
+} from '@/lib/user-agent';
 
 // 缓存时间：2小时
 const CELEBRITY_WORKS_CACHE_TIME = 2 * 60 * 60;
@@ -14,7 +17,7 @@ const MIN_REQUEST_INTERVAL = 2000; // 2秒最小间隔
 
 function randomDelay(min = 500, max = 1500): Promise<void> {
   const delay = Math.floor(Math.random() * (max - min + 1)) + min;
-  return new Promise(resolve => setTimeout(resolve, delay));
+  return new Promise((resolve) => setTimeout(resolve, delay));
 }
 
 /**
@@ -81,7 +84,7 @@ function parseDoubanSearchHtml(html: string): Array<{
         poster,
         rate,
         url: `https://movie.douban.com/subject/${id}/`,
-        source: 'douban'
+        source: 'douban',
       });
     }
   }
@@ -103,14 +106,14 @@ export async function GET(request: NextRequest) {
   if (!celebrityName?.trim()) {
     return NextResponse.json(
       { error: '缺少必要参数: name（演员名字）' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   if (limit < 1 || limit > 50) {
     return NextResponse.json(
       { error: 'limit 必须在 1-50 之间' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -124,7 +127,9 @@ export async function GET(request: NextRequest) {
     try {
       const cachedResult = await db.getCache(cacheKey);
       if (cachedResult) {
-        console.log(`✅ [豆瓣演员作品API] 缓存命中: ${celebrityName} - ${cachedResult.works?.length || 0} 项`);
+        console.log(
+          `✅ [豆瓣演员作品API] 缓存命中: ${celebrityName} - ${cachedResult.works?.length || 0} 项`,
+        );
         return NextResponse.json(cachedResult);
       }
       console.log(`❌ [豆瓣演员作品API] 缓存未命中，开始搜索...`);
@@ -136,8 +141,8 @@ export async function GET(request: NextRequest) {
     const now = Date.now();
     const timeSinceLastRequest = now - lastRequestTime;
     if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
-      await new Promise(resolve =>
-        setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest)
+      await new Promise((resolve) =>
+        setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest),
       );
     }
     lastRequestTime = Date.now();
@@ -166,9 +171,9 @@ export async function GET(request: NextRequest) {
       const response = await fetchDoubanWithVerification(apiUrl, {
         headers: {
           'User-Agent': ua,
-          'Accept': 'application/json, text/plain, */*',
+          Accept: 'application/json, text/plain, */*',
           'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-          'Referer': 'https://movie.douban.com/',
+          Referer: 'https://movie.douban.com/',
           ...secChHeaders,
         },
       });
@@ -185,7 +190,7 @@ export async function GET(request: NextRequest) {
           poster: item.cover,
           rate: item.rate || '',
           url: item.url,
-          source: 'douban-api'
+          source: 'douban-api',
         }));
       }
     } else {
@@ -196,10 +201,11 @@ export async function GET(request: NextRequest) {
       const response = await fetchDoubanWithVerification(searchUrl, {
         headers: {
           'User-Agent': ua,
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          Accept:
+            'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
           'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
           'Accept-Encoding': 'gzip, deflate, br',
-          'Referer': 'https://www.douban.com/',
+          Referer: 'https://www.douban.com/',
           ...secChHeaders,
           'Sec-Fetch-Dest': 'document',
           'Sec-Fetch-Mode': 'navigate',
@@ -227,12 +233,16 @@ export async function GET(request: NextRequest) {
       total: works.length,
     };
 
-    console.log(`[豆瓣演员作品API] 找到 ${works.length} 部作品 (mode: ${mode})`);
+    console.log(
+      `[豆瓣演员作品API] 找到 ${works.length} 部作品 (mode: ${mode})`,
+    );
 
     // 缓存结果
     try {
       await db.setCache(cacheKey, result, CELEBRITY_WORKS_CACHE_TIME);
-      console.log(`💾 [豆瓣演员作品API] 结果已缓存: "${celebrityName}" - ${works.length} 项, TTL: ${CELEBRITY_WORKS_CACHE_TIME}s`);
+      console.log(
+        `💾 [豆瓣演员作品API] 结果已缓存: "${celebrityName}" - ${works.length} 项, TTL: ${CELEBRITY_WORKS_CACHE_TIME}s`,
+      );
     } catch (cacheError) {
       console.warn('豆瓣演员作品缓存保存失败:', cacheError);
     }
@@ -245,14 +255,17 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error(`[豆瓣演员作品API] 搜索失败: ${celebrityName}`, (error as Error).message);
+    console.error(
+      `[豆瓣演员作品API] 搜索失败: ${celebrityName}`,
+      (error as Error).message,
+    );
     return NextResponse.json(
       {
         success: false,
         error: '豆瓣演员作品搜索失败',
         details: (error as Error).message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

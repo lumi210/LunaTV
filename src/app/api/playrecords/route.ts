@@ -5,7 +5,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthInfoFromCookie } from '@/lib/auth';
 import { getConfig } from '@/lib/config';
 import { db } from '@/lib/db';
-import { recordRequest, getDbQueryCount, resetDbQueryCount } from '@/lib/performance-monitor';
+import {
+  recordRequest,
+  getDbQueryCount,
+  resetDbQueryCount,
+} from '@/lib/performance-monitor';
 import { PlayRecord } from '@/lib/types';
 
 export const runtime = 'nodejs';
@@ -20,7 +24,10 @@ export async function GET(request: NextRequest) {
     const authInfo = getAuthInfoFromCookie(request);
     if (!authInfo || !authInfo.username) {
       const errorResponse = { error: 'Unauthorized' };
-      const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+      const errorSize = Buffer.byteLength(
+        JSON.stringify(errorResponse),
+        'utf8',
+      );
 
       recordRequest({
         timestamp: startTime,
@@ -28,7 +35,8 @@ export async function GET(request: NextRequest) {
         path: '/api/playrecords',
         statusCode: 401,
         duration: Date.now() - startTime,
-        memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+        memoryUsed:
+          (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
         dbQueries: getDbQueryCount(),
         requestSize: 0,
         responseSize: errorSize,
@@ -41,11 +49,14 @@ export async function GET(request: NextRequest) {
     if (authInfo.username !== process.env.USERNAME) {
       // 非站长，检查用户存在或被封禁
       const user = config.UserConfig.Users.find(
-        (u) => u.username === authInfo.username
+        (u) => u.username === authInfo.username,
       );
       if (!user) {
         const errorResponse = { error: '用户不存在' };
-        const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+        const errorSize = Buffer.byteLength(
+          JSON.stringify(errorResponse),
+          'utf8',
+        );
 
         recordRequest({
           timestamp: startTime,
@@ -53,7 +64,8 @@ export async function GET(request: NextRequest) {
           path: '/api/playrecords',
           statusCode: 401,
           duration: Date.now() - startTime,
-          memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+          memoryUsed:
+            (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
           dbQueries: getDbQueryCount(),
           requestSize: 0,
           responseSize: errorSize,
@@ -63,7 +75,10 @@ export async function GET(request: NextRequest) {
       }
       if (user.banned) {
         const errorResponse = { error: '用户已被封禁' };
-        const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+        const errorSize = Buffer.byteLength(
+          JSON.stringify(errorResponse),
+          'utf8',
+        );
 
         recordRequest({
           timestamp: startTime,
@@ -71,7 +86,8 @@ export async function GET(request: NextRequest) {
           path: '/api/playrecords',
           statusCode: 401,
           duration: Date.now() - startTime,
-          memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+          memoryUsed:
+            (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
           dbQueries: getDbQueryCount(),
           requestSize: 0,
           responseSize: errorSize,
@@ -128,7 +144,10 @@ export async function POST(request: NextRequest) {
     const authInfo = getAuthInfoFromCookie(request);
     if (!authInfo || !authInfo.username) {
       const errorResponse = { error: 'Unauthorized' };
-      const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+      const errorSize = Buffer.byteLength(
+        JSON.stringify(errorResponse),
+        'utf8',
+      );
 
       recordRequest({
         timestamp: startTime,
@@ -136,7 +155,8 @@ export async function POST(request: NextRequest) {
         path: '/api/playrecords',
         statusCode: 401,
         duration: Date.now() - startTime,
-        memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+        memoryUsed:
+          (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
         dbQueries: getDbQueryCount(),
         requestSize: 0,
         responseSize: errorSize,
@@ -149,11 +169,14 @@ export async function POST(request: NextRequest) {
     if (authInfo.username !== process.env.USERNAME) {
       // 非站长，检查用户存在或被封禁
       const user = config.UserConfig.Users.find(
-        (u) => u.username === authInfo.username
+        (u) => u.username === authInfo.username,
       );
       if (!user) {
         const errorResponse = { error: '用户不存在' };
-        const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+        const errorSize = Buffer.byteLength(
+          JSON.stringify(errorResponse),
+          'utf8',
+        );
 
         recordRequest({
           timestamp: startTime,
@@ -161,7 +184,8 @@ export async function POST(request: NextRequest) {
           path: '/api/playrecords',
           statusCode: 401,
           duration: Date.now() - startTime,
-          memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+          memoryUsed:
+            (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
           dbQueries: getDbQueryCount(),
           requestSize: 0,
           responseSize: errorSize,
@@ -171,7 +195,10 @@ export async function POST(request: NextRequest) {
       }
       if (user.banned) {
         const errorResponse = { error: '用户已被封禁' };
-        const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+        const errorSize = Buffer.byteLength(
+          JSON.stringify(errorResponse),
+          'utf8',
+        );
 
         recordRequest({
           timestamp: startTime,
@@ -179,7 +206,8 @@ export async function POST(request: NextRequest) {
           path: '/api/playrecords',
           statusCode: 401,
           duration: Date.now() - startTime,
-          memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+          memoryUsed:
+            (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
           dbQueries: getDbQueryCount(),
           requestSize: 0,
           responseSize: errorSize,
@@ -195,7 +223,10 @@ export async function POST(request: NextRequest) {
 
     if (!key || !record) {
       const errorResponse = { error: 'Missing key or record' };
-      const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+      const errorSize = Buffer.byteLength(
+        JSON.stringify(errorResponse),
+        'utf8',
+      );
 
       recordRequest({
         timestamp: startTime,
@@ -203,7 +234,8 @@ export async function POST(request: NextRequest) {
         path: '/api/playrecords',
         statusCode: 400,
         duration: Date.now() - startTime,
-        memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+        memoryUsed:
+          (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
         dbQueries: getDbQueryCount(),
         requestSize,
         responseSize: errorSize,
@@ -215,7 +247,10 @@ export async function POST(request: NextRequest) {
     // 验证播放记录数据
     if (!record.title || !record.source_name || record.index < 1) {
       const errorResponse = { error: 'Invalid record data' };
-      const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+      const errorSize = Buffer.byteLength(
+        JSON.stringify(errorResponse),
+        'utf8',
+      );
 
       recordRequest({
         timestamp: startTime,
@@ -223,7 +258,8 @@ export async function POST(request: NextRequest) {
         path: '/api/playrecords',
         statusCode: 400,
         duration: Date.now() - startTime,
-        memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+        memoryUsed:
+          (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
         dbQueries: getDbQueryCount(),
         requestSize,
         responseSize: errorSize,
@@ -236,7 +272,10 @@ export async function POST(request: NextRequest) {
     const [source, id] = key.split('+');
     if (!source || !id) {
       const errorResponse = { error: 'Invalid key format' };
-      const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+      const errorSize = Buffer.byteLength(
+        JSON.stringify(errorResponse),
+        'utf8',
+      );
 
       recordRequest({
         timestamp: startTime,
@@ -244,7 +283,8 @@ export async function POST(request: NextRequest) {
         path: '/api/playrecords',
         statusCode: 400,
         duration: Date.now() - startTime,
-        memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+        memoryUsed:
+          (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
         dbQueries: getDbQueryCount(),
         requestSize,
         responseSize: errorSize,
@@ -254,17 +294,27 @@ export async function POST(request: NextRequest) {
     }
 
     // 获取现有播放记录以保持原始集数
-    const existingRecord = await db.getPlayRecord(authInfo.username, source, id);
+    const existingRecord = await db.getPlayRecord(
+      authInfo.username,
+      source,
+      id,
+    );
 
     // 🔑 关键修复：信任客户端传来的 original_episodes（已经过 checkShouldUpdateOriginalEpisodes 验证）
     // 只有在客户端没有提供时，才使用数据库中的值作为 fallback
     let originalEpisodes: number;
-    if (record.original_episodes !== undefined && record.original_episodes !== null) {
+    if (
+      record.original_episodes !== undefined &&
+      record.original_episodes !== null
+    ) {
       // 客户端已经设置了 original_episodes，信任它（可能是更新后的值）
       originalEpisodes = record.original_episodes;
     } else {
       // 客户端没有提供，使用数据库中的值或当前 total_episodes
-      originalEpisodes = existingRecord?.original_episodes || existingRecord?.total_episodes || record.total_episodes;
+      originalEpisodes =
+        existingRecord?.original_episodes ||
+        existingRecord?.total_episodes ||
+        record.total_episodes;
     }
 
     const finalRecord = {
@@ -281,12 +331,15 @@ export async function POST(request: NextRequest) {
         authInfo.username,
         source,
         id,
-        finalRecord.play_time
+        finalRecord.play_time,
       );
     }
 
     const successResponse = { success: true };
-    const responseSize = Buffer.byteLength(JSON.stringify(successResponse), 'utf8');
+    const responseSize = Buffer.byteLength(
+      JSON.stringify(successResponse),
+      'utf8',
+    );
 
     recordRequest({
       timestamp: startTime,
@@ -332,7 +385,10 @@ export async function DELETE(request: NextRequest) {
     const authInfo = getAuthInfoFromCookie(request);
     if (!authInfo || !authInfo.username) {
       const errorResponse = { error: 'Unauthorized' };
-      const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+      const errorSize = Buffer.byteLength(
+        JSON.stringify(errorResponse),
+        'utf8',
+      );
 
       recordRequest({
         timestamp: startTime,
@@ -340,7 +396,8 @@ export async function DELETE(request: NextRequest) {
         path: '/api/playrecords',
         statusCode: 401,
         duration: Date.now() - startTime,
-        memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+        memoryUsed:
+          (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
         dbQueries: getDbQueryCount(),
         requestSize: 0,
         responseSize: errorSize,
@@ -353,11 +410,14 @@ export async function DELETE(request: NextRequest) {
     if (authInfo.username !== process.env.USERNAME) {
       // 非站长，检查用户存在或被封禁
       const user = config.UserConfig.Users.find(
-        (u) => u.username === authInfo.username
+        (u) => u.username === authInfo.username,
       );
       if (!user) {
         const errorResponse = { error: '用户不存在' };
-        const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+        const errorSize = Buffer.byteLength(
+          JSON.stringify(errorResponse),
+          'utf8',
+        );
 
         recordRequest({
           timestamp: startTime,
@@ -365,7 +425,8 @@ export async function DELETE(request: NextRequest) {
           path: '/api/playrecords',
           statusCode: 401,
           duration: Date.now() - startTime,
-          memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+          memoryUsed:
+            (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
           dbQueries: getDbQueryCount(),
           requestSize: 0,
           responseSize: errorSize,
@@ -375,7 +436,10 @@ export async function DELETE(request: NextRequest) {
       }
       if (user.banned) {
         const errorResponse = { error: '用户已被封禁' };
-        const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+        const errorSize = Buffer.byteLength(
+          JSON.stringify(errorResponse),
+          'utf8',
+        );
 
         recordRequest({
           timestamp: startTime,
@@ -383,7 +447,8 @@ export async function DELETE(request: NextRequest) {
           path: '/api/playrecords',
           statusCode: 401,
           duration: Date.now() - startTime,
-          memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+          memoryUsed:
+            (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
           dbQueries: getDbQueryCount(),
           requestSize: 0,
           responseSize: errorSize,
@@ -402,7 +467,10 @@ export async function DELETE(request: NextRequest) {
       const [source, id] = key.split('+');
       if (!source || !id) {
         const errorResponse = { error: 'Invalid key format' };
-        const errorSize = Buffer.byteLength(JSON.stringify(errorResponse), 'utf8');
+        const errorSize = Buffer.byteLength(
+          JSON.stringify(errorResponse),
+          'utf8',
+        );
 
         recordRequest({
           timestamp: startTime,
@@ -410,7 +478,8 @@ export async function DELETE(request: NextRequest) {
           path: '/api/playrecords',
           statusCode: 400,
           duration: Date.now() - startTime,
-          memoryUsed: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+          memoryUsed:
+            (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
           dbQueries: getDbQueryCount(),
           requestSize: 0,
           responseSize: errorSize,
@@ -428,12 +497,15 @@ export async function DELETE(request: NextRequest) {
         Object.keys(all).map(async (k) => {
           const [s, i] = k.split('+');
           if (s && i) await db.deletePlayRecord(username, s, i);
-        })
+        }),
       );
     }
 
     const successResponse = { success: true };
-    const responseSize = Buffer.byteLength(JSON.stringify(successResponse), 'utf8');
+    const responseSize = Buffer.byteLength(
+      JSON.stringify(successResponse),
+      'utf8',
+    );
 
     recordRequest({
       timestamp: startTime,

@@ -16,7 +16,7 @@ async function getShortDramaCategoriesInternal() {
   const response = await fetch('https://wwzy.tv/api.php/provide/vod?ac=list', {
     headers: {
       'User-Agent': DEFAULT_USER_AGENT,
-      'Accept': 'application/json',
+      Accept: 'application/json',
     },
     signal: AbortSignal.timeout(10000),
   });
@@ -32,7 +32,7 @@ async function getShortDramaCategoriesInternal() {
     {
       type_id: 46,
       type_name: '全部短剧',
-    }
+    },
   ];
 }
 
@@ -42,8 +42,9 @@ async function getCategoriesFromFallbackApi() {
 
   const response = await fetch(`${FALLBACK_API_BASE}/vod/categories`, {
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      'Accept': 'application/json',
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      Accept: 'application/json',
     },
     signal: AbortSignal.timeout(10000),
   });
@@ -70,17 +71,28 @@ export async function GET() {
     // 设置与网页端一致的缓存策略（categories: 4小时）
     const response = NextResponse.json(categories);
 
-    console.log('🕐 [CATEGORIES] 设置4小时HTTP缓存 - 与网页端categories缓存一致');
+    console.log(
+      '🕐 [CATEGORIES] 设置4小时HTTP缓存 - 与网页端categories缓存一致',
+    );
 
     // 4小时 = 14400秒（与网页端SHORTDRAMA_CACHE_EXPIRE.categories一致）
     const cacheTime = 14400;
-    response.headers.set('Cache-Control', `public, max-age=${cacheTime}, s-maxage=${cacheTime}`);
+    response.headers.set(
+      'Cache-Control',
+      `public, max-age=${cacheTime}, s-maxage=${cacheTime}`,
+    );
     response.headers.set('CDN-Cache-Control', `public, s-maxage=${cacheTime}`);
-    response.headers.set('Vercel-CDN-Cache-Control', `public, s-maxage=${cacheTime}`);
+    response.headers.set(
+      'Vercel-CDN-Cache-Control',
+      `public, s-maxage=${cacheTime}`,
+    );
 
     // 调试信息
     response.headers.set('X-Cache-Duration', '4hour');
-    response.headers.set('X-Cache-Expires-At', new Date(Date.now() + cacheTime * 1000).toISOString());
+    response.headers.set(
+      'X-Cache-Expires-At',
+      new Date(Date.now() + cacheTime * 1000).toISOString(),
+    );
     response.headers.set('X-Debug-Timestamp', new Date().toISOString());
 
     // Vary头确保不同设备有不同缓存
@@ -97,18 +109,24 @@ export async function GET() {
 
       const response = NextResponse.json(categories);
       const cacheTime = 14400;
-      response.headers.set('Cache-Control', `public, max-age=${cacheTime}, s-maxage=${cacheTime}`);
-      response.headers.set('CDN-Cache-Control', `public, s-maxage=${cacheTime}`);
-      response.headers.set('Vercel-CDN-Cache-Control', `public, s-maxage=${cacheTime}`);
+      response.headers.set(
+        'Cache-Control',
+        `public, max-age=${cacheTime}, s-maxage=${cacheTime}`,
+      );
+      response.headers.set(
+        'CDN-Cache-Control',
+        `public, s-maxage=${cacheTime}`,
+      );
+      response.headers.set(
+        'Vercel-CDN-Cache-Control',
+        `public, s-maxage=${cacheTime}`,
+      );
       response.headers.set('Vary', 'Accept-Encoding, User-Agent');
 
       return response;
     } catch (fallbackError) {
       console.error('备用API也失败:', fallbackError);
-      return NextResponse.json(
-        { error: '服务器内部错误' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
     }
   }
 }

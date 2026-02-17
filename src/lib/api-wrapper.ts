@@ -12,9 +12,12 @@ import { recordRequest } from './performance-monitor';
  * 注意：只能在 runtime = 'nodejs' 的 API 路由中使用
  */
 export function withPerformanceMonitoring(
-  handler: (request: NextRequest, ...args: any[]) => Promise<NextResponse>
+  handler: (request: NextRequest, ...args: any[]) => Promise<NextResponse>,
 ) {
-  return async (request: NextRequest, ...args: any[]): Promise<NextResponse> => {
+  return async (
+    request: NextRequest,
+    ...args: any[]
+  ): Promise<NextResponse> => {
     const startTime = Date.now();
     const startMemory = process.memoryUsage().heapUsed;
 
