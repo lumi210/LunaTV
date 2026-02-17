@@ -97,9 +97,16 @@ export async function executeQuery<T = Record<string, unknown>>(
   params?: unknown[],
 ): Promise<T[]> {
   const pool = getMysqlPool();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [rows] = (await pool.execute(sql, params)) as any;
-  return rows as T[];
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [rows] = (await pool.execute(sql, params)) as any;
+    return rows as T[];
+  } catch (error) {
+    console.error('[MySQL] Query failed:', sql);
+    console.error('[MySQL] Params:', params);
+    console.error('[MySQL] Error:', error);
+    throw error;
+  }
 }
 
 export async function executeUpdate(
@@ -107,11 +114,18 @@ export async function executeUpdate(
   params?: unknown[],
 ): Promise<{ affectedRows: number; insertId: number }> {
   const pool = getMysqlPool();
-  const [result] = await pool.execute(sql, params);
-  return {
-    affectedRows: (result as { affectedRows: number }).affectedRows,
-    insertId: (result as { insertId: number }).insertId,
-  };
+  try {
+    const [result] = await pool.execute(sql, params);
+    return {
+      affectedRows: (result as { affectedRows: number }).affectedRows,
+      insertId: (result as { insertId: number }).insertId,
+    };
+  } catch (error) {
+    console.error('[MySQL] Update failed:', sql);
+    console.error('[MySQL] Params:', params);
+    console.error('[MySQL] Error:', error);
+    throw error;
+  }
 }
 
 export type { Pool, PoolConnection };

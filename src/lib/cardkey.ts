@@ -107,6 +107,9 @@ export class CardKeyService {
     console.log('username:', username);
     console.log('cardKey:', cardKey);
 
+    // 确保用户存在于 users 表
+    await this.ensureUserExists(username);
+
     // 验证卡密
     const validation = await this.validateCardKey(cardKey);
     console.log('验证结果:', validation);
@@ -317,6 +320,20 @@ export class CardKeyService {
       const v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
+  }
+
+  // 确保用户存在于 users 表
+  async ensureUserExists(username: string): Promise<void> {
+    const ownerUser = process.env.USERNAME;
+    const role = username === ownerUser ? 'owner' : 'user';
+
+    // 检查用户是否存在
+    const exists = await db.checkUserExist(username);
+    if (!exists) {
+      // 创建用户（空密码，用户需要通过其他方式设置密码）
+      await db.registerUser(username, '');
+      console.log(`[CardKeyService] 自动创建用户: ${username}, 角色: ${role}`);
+    }
   }
 
   // 生成随机卡密（明文）
