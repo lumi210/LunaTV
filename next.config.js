@@ -47,6 +47,9 @@ const nextConfig = {
       },
     ],
   },
+
+  // 允许跨域访问开发服务器
+  allowedDevOrigins: ['47.113.227.252'],
 };
 
 module.exports = nextConfig;
