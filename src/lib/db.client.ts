@@ -736,7 +736,7 @@ async function checkShouldUpdateOriginalEpisodes(
   if (!skipFetch) {
     try {
       console.log(`🔍 从数据库读取最新的 original_episodes (${recordKey})...`);
-      const freshRecordsResponse = await fetch('/api/playrecords');
+      const freshRecordsResponse = await fetchWithAuth('/api/playrecords');
       if (freshRecordsResponse.ok) {
         const freshRecords = await freshRecordsResponse.json();
 

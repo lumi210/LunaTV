@@ -672,15 +672,21 @@ export class DbManager {
 
     const now = Date.now();
     const msPerDay = 1000 * 60 * 60 * 24;
-    const daysRemaining = Math.ceil((cardKeyInfo.expiresAt - now) / msPerDay);
+    const daysRemaining = Math.max(
+      0,
+      Math.ceil((cardKeyInfo.expiresAt - now) / msPerDay),
+    );
+    const isExpired = cardKeyInfo.expiresAt < now;
+    const isExpiring = !isExpired && daysRemaining <= 30;
 
     const result = {
+      plainKey: undefined, // fallback 模式下无法获取卡密明文
       boundKey: cardKeyInfo.boundKey,
       expiresAt: cardKeyInfo.expiresAt,
       boundAt: cardKeyInfo.boundAt,
       daysRemaining,
-      isExpiring: daysRemaining <= 30,
-      isExpired: daysRemaining <= 0,
+      isExpiring,
+      isExpired,
     };
     console.log('db.getUserCardKey - fallback result:', result);
 
