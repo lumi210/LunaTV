@@ -153,17 +153,29 @@ export class InvitationService {
 export class PointsService {
   // 获取用户积分余额
   static async getUserBalance(username: string): Promise<number> {
+    console.log(
+      '[PointsService.getUserBalance] 开始获取积分余额, username:',
+      username,
+    );
     let userPoints = await db.getUserPoints(username);
+    console.log('[PointsService.getUserBalance] userPoints:', userPoints);
 
     // 如果用户没有积分记录，自动创建一个
     if (!userPoints) {
+      console.log('[PointsService.getUserBalance] 用户无积分记录，正在创建...');
       const { createUserPoints } = await import('./mysql/queries/points');
       const code = generateInvitationCode();
       await createUserPoints(username, code);
       userPoints = await db.getUserPoints(username);
+      console.log(
+        '[PointsService.getUserBalance] 创建后 userPoints:',
+        userPoints,
+      );
     }
 
-    return userPoints?.balance || 0;
+    const balance = userPoints?.balance || 0;
+    console.log('[PointsService.getUserBalance] 返回余额:', balance);
+    return balance;
   }
 
   // 增加用户积分
