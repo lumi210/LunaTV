@@ -872,22 +872,26 @@ export class HybridStorage implements IStorage {
     const activeKey = await statsQueries.getActiveUserCardKey(userName);
     if (!activeKey) return null;
 
+    // 从 card_keys 表获取明文卡密
+    const cardKeys = await cardKeyQueries.getAllCardKeys();
+    const cardKey = cardKeys.find((ck) => ck.key_hash === activeKey.key_hash);
+
     const now = Date.now();
     const daysRemaining = Math.max(
       0,
-      Math.ceil(
-        (new Date(activeKey.expires_at).getTime() - now) /
-          (1000 * 60 * 60 * 24),
-      ),
+      Math.ceil((activeKey.expires_at - now) / (1000 * 60 * 60 * 24)),
     );
+    const isExpired = activeKey.expires_at < now;
+    const isExpiring = !isExpired && daysRemaining <= 30;
 
     return {
+      plainKey: cardKey?.plain_key || undefined, // 从 card_keys 表获取明文
       boundKey: activeKey.key_hash,
       expiresAt: new Date(activeKey.expires_at).getTime(),
       boundAt: new Date(activeKey.created_at).getTime(),
       daysRemaining,
-      isExpiring: daysRemaining <= 30,
-      isExpired: daysRemaining <= 0,
+      isExpiring,
+      isExpired,
     };
   }
 
