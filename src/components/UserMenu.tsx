@@ -257,6 +257,7 @@ export const UserMenu: React.FC = () => {
       }
     };
 
+    // 尝试获取卡密信息（服务端 API 会从请求的 cookie 中读取认证信息）
     fetchCardKeyInfo();
   }, []);
 
