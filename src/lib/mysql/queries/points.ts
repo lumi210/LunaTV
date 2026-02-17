@@ -133,9 +133,11 @@ export async function getPointsHistory(
   pageSize: number = 20,
 ): Promise<PointsRecordRow[]> {
   const offset = (page - 1) * pageSize;
+  const limitValue = Math.max(1, Math.floor(pageSize));
+  const offsetValue = Math.max(0, Math.floor(offset));
   return executeQuery<PointsRecordRow>(
-    'SELECT * FROM points_records WHERE username = ? ORDER BY created_at DESC LIMIT ? OFFSET ?',
-    [username, Number(pageSize), Number(offset)],
+    `SELECT * FROM points_records WHERE username = ? ORDER BY created_at DESC LIMIT ${limitValue} OFFSET ${offsetValue}`,
+    [username],
   );
 }
 
