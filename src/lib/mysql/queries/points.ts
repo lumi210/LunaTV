@@ -135,7 +135,7 @@ export async function getPointsHistory(
   const offset = (page - 1) * pageSize;
   return executeQuery<PointsRecordRow>(
     'SELECT * FROM points_records WHERE username = ? ORDER BY created_at DESC LIMIT ? OFFSET ?',
-    [username, pageSize, offset],
+    [username, parseInt(String(pageSize), 10), parseInt(String(offset), 10)],
   );
 }
 
