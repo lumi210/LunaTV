@@ -308,7 +308,7 @@ export class HybridStorage implements IStorage {
           username: userName,
           password: '',
           role: 'user',
-          banned: 0,
+          banned: false,
           tags: undefined,
           enabledApis: undefined,
           oidcSub: undefined,
