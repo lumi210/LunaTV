@@ -257,8 +257,11 @@ export const UserMenu: React.FC = () => {
       }
     };
 
-    fetchCardKeyInfo();
-  }, []);
+    // 只在用户登录时才获取卡密信息
+    if (authInfo?.username) {
+      fetchCardKeyInfo();
+    }
+  }, [authInfo?.username]);
 
   // 检查观影室功能是否启用
   useEffect(() => {
