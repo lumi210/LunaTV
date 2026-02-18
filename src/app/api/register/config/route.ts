@@ -19,11 +19,11 @@ export async function GET() {
 
     const cardKeyEnabled = cardKeyConfig.enabled === true;
     const systemMode = cardKeyConfig.systemMode || 'operation';
+    const requireCardKeyOnRegister =
+      cardKeyConfig.requireCardKeyOnRegister !== false;
 
     const showCardKeyInput =
-      cardKeyEnabled &&
-      systemMode === 'operation' &&
-      cardKeyConfig.requireCardKeyOnRegister !== false;
+      cardKeyEnabled && requireCardKeyOnRegister && systemMode === 'operation';
 
     return NextResponse.json({
       allowRegister,
