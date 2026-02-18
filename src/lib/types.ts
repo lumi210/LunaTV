@@ -620,7 +620,7 @@ export interface UserCardKey {
   username: string;
   type: CardKeyType;
   status: CardKeyStatus;
-  source: 'invitation' | 'redeem' | 'manual';
+  source: 'invitation' | 'redeem' | 'manual' | 'promotion_register';
   createdAt: number;
   expiresAt: number;
   usedAt?: number;
