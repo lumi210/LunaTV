@@ -162,8 +162,9 @@ function HomeClient() {
   // 卡密信息状态
   const [cardKeyInfo, setCardKeyInfo] = useState<any>(null);
   const [loadingCardKey, setLoadingCardKey] = useState(false);
+  const [welcomeBannerInfo, setWelcomeBannerInfo] = useState<any>(null);
 
-  // 获取卡密信息
+  // 获取卡密信息和欢迎栏信息
   useEffect(() => {
     const fetchCardKeyInfo = async () => {
       const authInfo = getAuthInfoFromBrowserCookie();
@@ -173,14 +174,21 @@ function HomeClient() {
 
       setLoadingCardKey(true);
       try {
-        const response = await fetch('/api/user/cardkey');
-        if (!response.ok) {
-          return;
+        const [cardKeyResponse, bannerResponse] = await Promise.all([
+          fetch('/api/user/cardkey'),
+          fetch('/api/user/welcome-banner'),
+        ]);
+
+        if (cardKeyResponse.ok) {
+          const data = await cardKeyResponse.json();
+          if (data.hasCardKey && data.cardKeyInfo) {
+            setCardKeyInfo(data.cardKeyInfo);
+          }
         }
 
-        const data = await response.json();
-        if (data.hasCardKey && data.cardKeyInfo) {
-          setCardKeyInfo(data.cardKeyInfo);
+        if (bannerResponse.ok) {
+          const bannerData = await bannerResponse.json();
+          setWelcomeBannerInfo(bannerData);
         }
       } catch (error) {
         console.error('获取卡密信息失败:', error);
@@ -764,22 +772,30 @@ function HomeClient() {
               </p>
 
               {/* 卡密到期时间 */}
-              {!loadingCardKey && cardKeyInfo && cardKeyInfo.expiresAt && (
-                <div className='flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300 animate-slide-in-up animate-delay-200'>
-                  <span className='flex items-center gap-1'>
+              {!loadingCardKey && welcomeBannerInfo && (
+                <div
+                  className={`flex flex-col gap-2 text-xs sm:text-sm animate-slide-in-up animate-delay-200 ${
+                    welcomeBannerInfo.urgency === 'high'
+                      ? 'text-red-600 dark:text-red-400'
+                      : welcomeBannerInfo.urgency === 'medium'
+                        ? 'text-orange-600 dark:text-orange-400'
+                        : 'text-gray-600 dark:text-gray-300'
+                  }`}
+                >
+                  <div className='flex items-center gap-2'>
                     <span>📅</span>
-                    <span>卡密到期:</span>
-                  </span>
-                  <span className='font-semibold text-amber-600 dark:text-amber-400'>
-                    {new Date(cardKeyInfo.expiresAt).toLocaleDateString(
-                      'zh-CN',
-                      {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                      },
+                    <span>{welcomeBannerInfo.message}</span>
+                  </div>
+                  {welcomeBannerInfo.actionText &&
+                    welcomeBannerInfo.actionUrl && (
+                      <Link
+                        href={welcomeBannerInfo.actionUrl}
+                        className='inline-flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400 hover:underline'
+                      >
+                        {welcomeBannerInfo.actionText}
+                        <ChevronRight size={16} />
+                      </Link>
                     )}
-                  </span>
                 </div>
               )}
               {loadingCardKey && (
