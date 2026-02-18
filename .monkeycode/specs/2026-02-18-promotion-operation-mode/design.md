@@ -190,6 +190,8 @@ interface ICardKeyServiceExtension {
 ```
 POST /api/admin/cardkey/system-mode    - 设置系统模式和推广卡密类型
 GET  /api/register/config              - 获取注册配置（包含模式信息）
+GET  /api/user/cardkey/info            - 获取用户卡密信息（用于欢迎栏）
+GET  /api/user/welcome-banner          - 获取欢迎栏显示信息
 ```
 
 #### 3.2 修改现有 API
@@ -213,6 +215,31 @@ interface AdminConfig {
     systemMode?: 'promotion' | 'operation'; // 默认 'operation'
     promotionCardKeyType?: 'year' | 'quarter' | 'month' | 'week'; // 默认 'week'
   };
+}
+```
+
+### 5. 欢迎栏到期信息展示接口
+
+```typescript
+// 用户卡密到期信息
+interface UserCardKeyInfo {
+  username: string;
+  hasCardKey: boolean; // 是否有绑定的卡密
+  isPromotionUser: boolean; // 是否为推广模式用户
+  expirationDate?: number; // 到期时间戳
+  isExpiringSoon: boolean; // 是否即将到期（7天内）
+  daysUntilExpiration?: number; // 剩余天数
+  canInviteForExtension: boolean; // 是否可以通过邀请延期
+}
+
+// 欢迎栏信息响应
+interface WelcomeBannerInfo {
+  type: 'promotion_expiring' | 'normal_expiration' | 'no_cardkey' | 'admin';
+  message: string; // 显示的消息
+  expirationDate?: string; // 格式化的到期日期 YYYY-MM-DD
+  actionText?: string; // 可操作按钮文本
+  actionUrl?: string; // 可操作按钮跳转链接
+  urgency: 'low' | 'medium' | 'high'; // 紧急程度
 }
 ```
 
@@ -255,12 +282,16 @@ interface AdminConfig {
 2. **推广卡密类型默认值**: 推广卡密类型默认为 `week`
 3. **卡密来源标识**: 推广模式自动生成的卡密必须标记 `source` 为 `promotion_register`
 4. **用户卡密优先**: 推广模式下用户主动提供的卡密优先使用
+5. **到期信息准确性**: 欢迎栏显示的到期信息必须与用户实际绑定的卡密一致
 
 ### 2. 业务规则约束
 
 1. **模式切换权限**: 只有 owner 和 admin 角色可以修改系统模式
 2. **手动卡密优先**: 推广模式下，如果用户提供了卡密，优先使用用户提供的卡密
 3. **配置一致性**: 前端注册页面与后端注册API必须使用同一模式配置
+4. **推广用户识别**: 卡密来源为 `promotion_register` 的用户被识别为推广用户
+5. **到期提醒优先级**: 卡密即将到期（7天内）时，优先显示到期提醒
+6. **管理员豁免**: owner 和 admin 角色的用户不显示卡密到期信息
 
 ## Error Handling
 
@@ -358,7 +389,16 @@ interface AdminConfig {
 2. 根据模式动态显示/隐藏卡密输入项
 3. 添加推广模式下的注册提示文案
 
-### 阶段 5: 测试和文档
+### 阶段 5: 欢迎栏到期信息实现
+
+1. 创建 `/api/user/cardkey/info` API，返回用户卡密信息
+2. 创建 `/api/user/welcome-banner` API，返回欢迎栏显示信息
+3. 在首页添加欢迎栏组件，显示到期信息
+4. 推广模式用户显示"账户将于7日后到期，推荐好友获取卡密延期"
+5. 普通用户显示"卡密到期日期: YYYY-MM-DD"
+6. 添加到期提醒的可操作按钮（跳转到推广码分享或积分兑换页面）
+
+### 阶段 6: 测试和文档
 
 1. 编写单元测试
 2. 编写集成测试
