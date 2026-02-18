@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
 
     config.CardKeyConfig = newCardKeyConfig;
 
-    await db.setAdminConfig(config);
+    await db.saveAdminConfig(config);
     clearConfigCache();
 
     console.log(
