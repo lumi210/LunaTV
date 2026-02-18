@@ -890,30 +890,57 @@ export class HybridStorage implements IStorage {
   async getUserCardKey(userName: string): Promise<UserCardKeyInfo | null> {
     incrementDbQuery();
     const activeKey = await statsQueries.getActiveUserCardKey(userName);
-    if (!activeKey) return null;
+    if (activeKey) {
+      const cardKeys = await cardKeyQueries.getAllCardKeys();
+      const cardKey = cardKeys.find((ck) => ck.key_hash === activeKey.key_hash);
 
-    // 从 card_keys 表获取明文卡密
-    const cardKeys = await cardKeyQueries.getAllCardKeys();
-    const cardKey = cardKeys.find((ck) => ck.key_hash === activeKey.key_hash);
+      const now = Date.now();
+      const expiresAtTime = activeKey.expires_at.getTime();
+      const daysRemaining = Math.max(
+        0,
+        Math.ceil((expiresAtTime - now) / (1000 * 60 * 60 * 24)),
+      );
+      const isExpired = expiresAtTime < now;
+      const isExpiring = !isExpired && daysRemaining <= 30;
 
-    const now = Date.now();
-    const expiresAtTime = activeKey.expires_at.getTime();
-    const daysRemaining = Math.max(
-      0,
-      Math.ceil((expiresAtTime - now) / (1000 * 60 * 60 * 24)),
-    );
-    const isExpired = expiresAtTime < now;
-    const isExpiring = !isExpired && daysRemaining <= 30;
+      return {
+        plainKey: cardKey?.plain_key || undefined,
+        boundKey: activeKey.key_hash,
+        expiresAt: expiresAtTime,
+        boundAt: activeKey.created_at.getTime(),
+        daysRemaining,
+        isExpiring,
+        isExpired,
+      };
+    }
 
-    return {
-      plainKey: cardKey?.plain_key || undefined, // 从 card_keys 表获取明文
-      boundKey: activeKey.key_hash,
-      expiresAt: expiresAtTime,
-      boundAt: activeKey.created_at.getTime(),
-      daysRemaining,
-      isExpiring,
-      isExpired,
-    };
+    const userCardKeys = await statsQueries.getUserCardKeys(userName);
+    const unusedKey = userCardKeys.find((k) => k.status === 'unused');
+    if (unusedKey) {
+      const cardKeys = await cardKeyQueries.getAllCardKeys();
+      const cardKey = cardKeys.find((ck) => ck.key_hash === unusedKey.key_hash);
+
+      const now = Date.now();
+      const expiresAtTime = unusedKey.expires_at.getTime();
+      const daysRemaining = Math.max(
+        0,
+        Math.ceil((expiresAtTime - now) / (1000 * 60 * 60 * 24)),
+      );
+      const isExpired = expiresAtTime < now;
+      const isExpiring = !isExpired && daysRemaining <= 30;
+
+      return {
+        plainKey: cardKey?.plain_key || undefined,
+        boundKey: unusedKey.key_hash,
+        expiresAt: expiresAtTime,
+        boundAt: unusedKey.created_at.getTime(),
+        daysRemaining,
+        isExpiring,
+        isExpired,
+      };
+    }
+
+    return null;
   }
 
   async getFullUserCardKey(userName: string): Promise<UserCardKeyInfo | null> {
