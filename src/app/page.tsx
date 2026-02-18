@@ -782,26 +782,23 @@ function HomeClient() {
                         : 'text-gray-600 dark:text-gray-300'
                   }`}
                 >
-                  <div className='flex items-center gap-2'>
-                    <span>📅</span>
-                    <span>{welcomeBannerInfo.message}</span>
-                  </div>
+                  {/* 推广模式用户只显示提示信息，不显示卡密到期日期 */}
+                  {welcomeBannerInfo.type !== 'promotion_expiring' && (
+                    <div className='flex items-center gap-2'>
+                      <span>📅</span>
+                      <span>{welcomeBannerInfo.message}</span>
+                    </div>
+                  )}
                   {welcomeBannerInfo.actionText &&
                     welcomeBannerInfo.actionUrl && (
                       <div className='flex items-center gap-2 text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-3 py-1.5 rounded-lg'>
                         <span>⏰</span>
                         <span>
-                          {welcomeBannerInfo.type === 'no_cardkey' ? (
-                            <>
-                              账户将于<strong>7</strong>日后到期，
-                            </>
-                          ) : (
-                            <>
-                              账户将于
-                              <strong>{welcomeBannerInfo.daysRemaining}</strong>
-                              日后到期，
-                            </>
-                          )}
+                          账户将于
+                          <strong>
+                            {welcomeBannerInfo.daysRemaining || 7}
+                          </strong>
+                          日后到期，
                           <Link
                             href={welcomeBannerInfo.actionUrl}
                             className='underline font-medium hover:text-orange-700 dark:hover:text-orange-300'
