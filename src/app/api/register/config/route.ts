@@ -22,8 +22,8 @@ export async function GET() {
     const requireCardKeyOnRegister =
       cardKeyConfig.requireCardKeyOnRegister !== false;
 
-    const showCardKeyInput =
-      cardKeyEnabled && requireCardKeyOnRegister && systemMode === 'operation';
+    // 运营模式下默认显示卡密输入项，推广模式下不显示
+    const showCardKeyInput = systemMode === 'operation';
 
     return NextResponse.json({
       allowRegister,
