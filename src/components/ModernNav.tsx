@@ -3,19 +3,22 @@
 'use client';
 
 import {
-  Cat,
-  Clover,
-  Film,
-  Globe,
+  Antenna,
+  Clapperboard,
+  Compass,
+  Drama,
+  Earth,
+  Flame,
+  Ghost,
   Home,
+  Mic2,
   MoreHorizontal,
-  PlaySquare,
-  Radio,
+  Popcorn,
   Search,
   Sparkles,
   Star,
-  Tv,
   X,
+  ZoomIn,
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -51,63 +54,63 @@ export default function ModernNav({
 
   const [menuItems, setMenuItems] = useState<NavItem[]>([
     {
-      icon: Home,
+      icon: Flame,
       label: '首页',
       href: '/',
       color: 'text-orange-500',
       gradient: 'from-orange-500 to-amber-500',
     },
     {
-      icon: Search,
+      icon: ZoomIn,
       label: '搜索',
       href: '/search',
       color: 'text-amber-500',
       gradient: 'from-amber-500 to-yellow-500',
     },
     {
-      icon: Globe,
+      icon: Earth,
       label: '源浏览器',
       href: '/source-browser',
-      color: 'text-yellow-500',
-      gradient: 'from-yellow-500 to-orange-400',
+      color: 'text-blue-500',
+      gradient: 'from-blue-500 to-cyan-500',
     },
     {
-      icon: Film,
+      icon: Popcorn,
       label: '电影',
       href: '/douban?type=movie',
       color: 'text-red-500',
-      gradient: 'from-red-500 to-orange-500',
+      gradient: 'from-red-500 to-pink-500',
     },
     {
-      icon: Tv,
+      icon: Clapperboard,
       label: '剧集',
       href: '/douban?type=tv',
-      color: 'text-orange-600',
-      gradient: 'from-orange-600 to-amber-600',
+      color: 'text-purple-500',
+      gradient: 'from-purple-500 to-violet-500',
     },
     {
-      icon: PlaySquare,
+      icon: Drama,
       label: '短剧',
       href: '/shortdrama',
-      color: 'text-amber-600',
-      gradient: 'from-amber-600 to-orange-500',
-    },
-    {
-      icon: Cat,
-      label: '动漫',
-      href: '/douban?type=anime',
       color: 'text-pink-500',
       gradient: 'from-pink-500 to-rose-500',
     },
     {
-      icon: Clover,
-      label: '综艺',
-      href: '/douban?type=show',
-      color: 'text-orange-500',
-      gradient: 'from-orange-500 to-amber-500',
+      icon: Ghost,
+      label: '动漫',
+      href: '/douban?type=anime',
+      color: 'text-indigo-500',
+      gradient: 'from-indigo-500 to-purple-500',
     },
     {
-      icon: Radio,
+      icon: Mic2,
+      label: '综艺',
+      href: '/douban?type=show',
+      color: 'text-teal-500',
+      gradient: 'from-teal-500 to-cyan-500',
+    },
+    {
+      icon: Antenna,
       label: '直播',
       href: '/live',
       color: 'text-rose-500',
@@ -359,13 +362,13 @@ export default function ModernNav({
 
       {/* Enhanced Mobile Bottom Navigation - Premium Style */}
       <nav
-        className='md:hidden fixed left-0 right-0 z-40 bg-gradient-to-t from-white/98 via-white/95 to-white/92 dark:from-gray-900/98 dark:via-gray-900/95 dark:to-gray-900/92 backdrop-blur-3xl border-t border-gradient-to-t from-orange-200/40 via-orange-100/30 to-amber-50/20 dark:from-orange-900/40 dark:via-orange-800/30 dark:to-amber-900/20 shadow-2xl shadow-orange-500/10 dark:shadow-orange-500/15 transition-all duration-500'
+        className='md:hidden fixed left-0 right-0 z-40 bg-gradient-to-t from-white/98 via-white/95 to-white/92 dark:from-gray-900/98 dark:via-gray-900/95 dark:to-gray-900/92 backdrop-blur-3xl border-t border-gradient-to-t from-orange-200/40 via-orange-100/30 to-amber-50/20 dark:from-orange-900/40 dark:via-orange-800/30 dark:to-amber-900/20 shadow-xl shadow-orange-500/10 dark:shadow-orange-500/15 transition-all duration-500'
         style={{
           bottom: 0,
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
-        <div className='flex items-center justify-around px-2 py-3.5'>
+        <div className='flex items-center justify-around px-1 py-2'>
           {/* Enhanced first 4 items with premium effects */}
           {menuItems.slice(0, 4).map((item) => {
             const Icon = item.icon;
@@ -377,42 +380,27 @@ export default function ModernNav({
                 href={item.href}
                 useTransitionNav
                 onClick={() => setActive(item.href)}
-                className='flex flex-col items-center justify-center min-w-[64px] flex-1 py-3 px-2 transition-all duration-300 active:scale-95 group'
+                className='flex flex-col items-center justify-center min-w-[56px] flex-1 py-1.5 px-1 transition-all duration-300 active:scale-95 group'
               >
-                <div className='relative mb-2'>
+                <div className='relative mb-0.5'>
                   <Icon
-                    className={`w-[26px] h-[26px] transition-all duration-300 ${
+                    className={`w-[24px] h-[24px] transition-all duration-300 ${
                       active
-                        ? `${item.color} drop-shadow-2xl drop-shadow-orange-500/60 scale-110`
-                        : 'text-gray-600 dark:text-gray-400 group-hover:text-orange-500 group-hover:scale-105 group-hover:drop-shadow-md group-hover:drop-shadow-orange-500/20'
+                        ? `${item.color} drop-shadow-xl drop-shadow-orange-500/60 scale-110`
+                        : 'text-gray-600 dark:text-gray-400 group-hover:text-orange-500 group-hover:scale-105'
                     }`}
                   />
                   {active && (
-                    <>
-                      <div
-                        className={`absolute inset-0 bg-gradient-to-br ${item.gradient} blur-2xl opacity-60 rounded-full animate-pulse-soft`}
-                      />
-                      <div
-                        className={`absolute inset-0 bg-gradient-to-br ${item.gradient} blur-xl opacity-40 rounded-full animate-pulse`}
-                      />
-                      <div
-                        className={`absolute -inset-1.5 bg-gradient-to-br ${item.gradient} opacity-0 rounded-full animate-ping`}
-                        style={{ animationDuration: '2.5s' }}
-                      />
-                    </>
-                  )}
-                  {/* Subtle hover glow for inactive state */}
-                  {!active && (
                     <div
-                      className={`absolute inset-0 bg-gradient-to-br ${item.gradient} blur-lg opacity-0 rounded-full group-hover:opacity-20 group-hover:blur-md transition-all duration-300`}
+                      className={`absolute inset-0 bg-gradient-to-br ${item.gradient} blur-lg opacity-50 rounded-full`}
                     />
                   )}
                 </div>
                 <span
-                  className={`text-[11px] font-semibold tracking-wide transition-colors duration-300 ${
+                  className={`text-[11px] font-medium tracking-wide transition-colors duration-300 ${
                     active
-                      ? `${item.color} font-extrabold drop-shadow-sm`
-                      : 'text-gray-600 dark:text-gray-400 group-hover:text-orange-500 group-hover:font-semibold'
+                      ? `${item.color} font-semibold`
+                      : 'text-gray-500 dark:text-gray-400 group-hover:text-orange-500'
                   }`}
                 >
                   {item.label}
@@ -424,14 +412,12 @@ export default function ModernNav({
           {/* Enhanced More button with premium styling */}
           <button
             onClick={() => setShowMoreMenu(true)}
-            className='flex flex-col items-center justify-center min-w-[64px] flex-1 py-3 px-2 transition-all duration-300 active:scale-95 group'
+            className='flex flex-col items-center justify-center min-w-[56px] flex-1 py-1.5 px-1 transition-all duration-300 active:scale-95 group'
           >
-            <div className='relative mb-2'>
-              <MoreHorizontal className='w-[26px] h-[26px] text-gray-600 dark:text-gray-400 group-hover:text-orange-500 group-hover:scale-105 group-hover:drop-shadow-md group-hover:drop-shadow-orange-500/20 transition-all duration-300' />
-              {/* Subtle glow on hover */}
-              <div className='absolute inset-0 bg-gradient-to-br from-orange-500 to-amber-500 blur-lg opacity-0 rounded-full group-hover:opacity-20 group-hover:blur-md transition-all duration-300' />
+            <div className='relative mb-0.5'>
+              <MoreHorizontal className='w-[24px] h-[24px] text-gray-600 dark:text-gray-400 group-hover:text-orange-500 group-hover:scale-105 transition-all duration-300' />
             </div>
-            <span className='text-[11px] font-semibold text-gray-600 dark:text-gray-400 group-hover:text-orange-500 group-hover:font-medium transition-colors duration-300'>
+            <span className='text-[11px] font-medium text-gray-500 dark:text-gray-400 group-hover:text-orange-500 transition-colors duration-300'>
               更多
             </span>
           </button>
@@ -440,7 +426,7 @@ export default function ModernNav({
 
       {/* Enhanced spacer for fixed navigation */}
       <div className='hidden md:block h-[88px]' />
-      <div className='md:hidden h-[100px]' />
+      <div className='md:hidden h-[60px]' />
     </>
   );
 }

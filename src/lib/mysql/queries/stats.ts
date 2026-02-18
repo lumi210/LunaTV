@@ -7,7 +7,7 @@ export interface UserCardKeyRow {
   username: string;
   key_type: CardKeyType;
   status: CardKeyStatus;
-  source: 'invitation' | 'redeem' | 'manual';
+  source: 'invitation' | 'redeem' | 'manual' | 'promotion_register';
   created_at: Date;
   expires_at: Date;
   used_at: Date | null;
