@@ -115,19 +115,14 @@ export class InvitationService {
 
     // 如果用户没有积分记录，自动创建并生成邀请码
     if (!userPoints) {
+      const { createUserPoints } = await import('./mysql/queries/points');
       const code = generateInvitationCode();
-      userPoints = {
-        username,
-        invitationCode: code,
-        balance: 0,
-        totalEarned: 0,
-        totalRedeemed: 0,
-        updatedAt: Date.now(),
-      };
-      await db.updateUserPoints(userPoints);
+      await createUserPoints(username, code);
+      userPoints = await db.getUserPoints(username);
     } else if (!userPoints.invitationCode) {
-      // 如果有积分记录但没有邀请码，生成一个
-      userPoints.invitationCode = generateInvitationCode();
+      // 如果有积分记录但没有邀请码，生成一个并更新
+      const code = generateInvitationCode();
+      userPoints.invitationCode = code;
       userPoints.updatedAt = Date.now();
       await db.updateUserPoints(userPoints);
     }
@@ -135,10 +130,10 @@ export class InvitationService {
     const invitations = await db.getInvitationsByInviter(username);
 
     return {
-      code: userPoints.invitationCode,
+      code: userPoints?.invitationCode || '',
       totalInvites: invitations.length,
-      totalRewards: userPoints.totalEarned || 0,
-      balance: userPoints.balance || 0,
+      totalRewards: userPoints?.totalEarned || 0,
+      balance: userPoints?.balance || 0,
     };
   }
 

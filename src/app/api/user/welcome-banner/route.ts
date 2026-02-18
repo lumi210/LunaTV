@@ -66,8 +66,11 @@ export async function GET(request: NextRequest) {
       console.log('用户没有绑定卡密');
       const noCardKeyInfo: WelcomeBannerInfo = {
         type: 'no_cardkey',
-        message: '请绑定卡密以使用系统',
-        urgency: 'high',
+        message: '账户将于7日后到期',
+        daysRemaining: 7,
+        urgency: 'medium',
+        actionText: '推荐好友注册',
+        actionUrl: '/settings',
       };
       return NextResponse.json(noCardKeyInfo, {
         headers: { 'Cache-Control': 'no-store' },
@@ -100,30 +103,28 @@ export async function GET(request: NextRequest) {
         console.log('卡密已过期');
         bannerInfo = {
           type: 'promotion_expiring',
-          message: '卡密已过期，推荐好友获取卡密延期',
-          urgency: 'high',
-          actionText: '邀请好友',
-          actionUrl: '/my-invitation',
-        };
-      } else if (daysRemaining <= 7) {
-        console.log('卡密即将到期');
-        bannerInfo = {
-          type: 'promotion_expiring',
-          message: `账户将于 ${daysRemaining} 日后到期，推荐好友获取卡密延期`,
+          message: '卡密已过期',
           expirationDate: formattedDate,
-          daysRemaining,
-          urgency: daysRemaining <= 3 ? 'high' : 'medium',
-          actionText: '邀请好友',
-          actionUrl: '/my-invitation',
+          daysRemaining: 0,
+          urgency: 'high',
+          actionText: '推荐好友注册',
+          actionUrl: '/settings',
         };
       } else {
-        console.log('推广用户正常');
+        console.log('推广用户');
         bannerInfo = {
-          type: 'normal_expiration',
+          type: 'promotion_expiring',
           message: `卡密到期日期: ${formattedDate}`,
           expirationDate: formattedDate,
           daysRemaining,
-          urgency: daysRemaining <= 30 ? 'medium' : 'low',
+          urgency:
+            daysRemaining <= 7
+              ? 'high'
+              : daysRemaining <= 30
+                ? 'medium'
+                : 'low',
+          actionText: '推荐好友注册',
+          actionUrl: '/settings',
         };
       }
     } else {
