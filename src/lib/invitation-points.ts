@@ -313,20 +313,13 @@ export class PointsService {
         keyHash: fullCardKey.keyHash,
         username,
         type: config.cardKeyType,
-        status: 'used',
+        status: 'unused',
         source: 'redeem',
         createdAt: Date.now(),
         expiresAt: fullCardKey.expiresAt,
       };
 
       await db.addUserCardKey(userCardKey);
-
-      const userCardKeyInfo: import('./admin.types').UserCardKeyData = {
-        boundKey: fullCardKey.keyHash,
-        expiresAt: fullCardKey.expiresAt,
-        boundAt: Date.now(),
-      };
-      await db.updateUserCardKeyInfo(username, userCardKeyInfo);
 
       await this.deductPointsWithCardKey(
         username,

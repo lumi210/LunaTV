@@ -185,13 +185,12 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
   return (
     <nav
       className={cn(
-        'md:hidden fixed left-4 right-4 z-600',
-        'bottom-6',
-        'bg-black/70 dark:bg-black/80',
-        'backdrop-blur-xl',
-        'rounded-3xl',
-        'border border-white/10',
-        'shadow-2xl shadow-black/50',
+        'md:hidden fixed left-0 right-0 z-40',
+        'bottom-0',
+        'bg-gradient-to-t from-white/98 via-white/95 to-white/92 dark:from-gray-900/98 dark:via-gray-900/95 dark:to-gray-900/92',
+        'backdrop-blur-3xl',
+        'border-t border-orange-200/40 dark:border-orange-900/40',
+        'shadow-xl shadow-orange-500/10 dark:shadow-orange-500/15',
       )}
       style={{
         paddingBottom: 'env(safe-area-inset-bottom)',
@@ -235,7 +234,7 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
                 'active:scale-95',
                 active
                   ? `${item.activeGradient} ${item.activeTextColor} shadow-lg shadow-violet-500/30`
-                  : 'text-gray-400 hover:bg-white/5',
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-orange-50 dark:hover:bg-orange-900/20',
               )}
             >
               <Icon
@@ -249,7 +248,7 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
                 className={cn(
                   'text-[10px] font-medium',
                   'transition-all duration-300',
-                  active ? 'text-white' : 'text-gray-400',
+                  active ? 'text-white' : 'text-gray-500 dark:text-gray-400',
                 )}
               >
                 {item.label}

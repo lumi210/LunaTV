@@ -120,7 +120,9 @@ export default function PointsExchangePage() {
         throw new Error(data.error || '兑换失败');
       }
 
-      setSuccess(`兑换成功！卡密：${data.cardKey}`);
+      setSuccess(
+        `兑换成功！您已获得一张${cardKeyTypeName}，请在「未使用卡密」中查看。`,
+      );
       await fetchData();
     } catch (err) {
       console.error('兑换失败:', err);
