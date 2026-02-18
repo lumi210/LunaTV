@@ -77,12 +77,14 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const allCardKeys = await db.getAllCardKeys();
-    const boundCardKey = allCardKeys.find(
-      (ck) => ck.keyHash === cardKeyInfo.boundKey,
+    const isPromotionUser = cardKeyInfo.source === 'promotion_register';
+    console.log(
+      'isPromotionUser:',
+      isPromotionUser,
+      'source:',
+      cardKeyInfo.source,
     );
 
-    const isPromotionUser = boundCardKey?.source === 'promotion_register';
     const now = Date.now();
     const daysRemaining = Math.ceil(
       (cardKeyInfo.expiresAt - now) / (1000 * 60 * 60 * 24),
