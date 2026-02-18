@@ -1764,16 +1764,6 @@ export abstract class BaseRedisStorage implements IStorage {
     );
     console.log('getFullUserCardKey - found cardKey:', cardKey);
 
-    if (!cardKey) {
-      console.error(
-        '未找到匹配的卡密, boundKey:',
-        userCardKeyInfo.boundKey,
-        '所有卡密 keyHash:',
-        allCardKeys.map((ck) => ck.keyHash),
-      );
-      return null;
-    }
-
     // 使用 userCardKeyInfo.expiresAt 计算剩余天数(这是延期后的实际过期时间)
     const now = Date.now();
     const daysRemaining = Math.max(
@@ -1784,7 +1774,7 @@ export abstract class BaseRedisStorage implements IStorage {
     const isExpiring = !isExpired && daysRemaining <= 30;
 
     const result = {
-      plainKey: cardKey.key,
+      plainKey: cardKey?.key,
       boundKey: userCardKeyInfo.boundKey,
       expiresAt: userCardKeyInfo.expiresAt,
       boundAt: userCardKeyInfo.boundAt,
