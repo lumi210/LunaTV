@@ -4,6 +4,7 @@
 
 import {
   AlertCircle,
+  Calendar,
   CheckCircle,
   Copy,
   Gift,
@@ -25,6 +26,17 @@ interface InvitationConfig {
   cardKeyType: 'year' | 'quarter' | 'month' | 'week';
 }
 
+interface UserCardKeyInfo {
+  plainKey?: string;
+  boundKey: string;
+  expiresAt: number;
+  boundAt: number;
+  daysRemaining: number;
+  isExpiring: boolean;
+  isExpired: boolean;
+  source?: 'invitation' | 'redeem' | 'manual' | 'promotion_register';
+}
+
 const cardKeyTypeLabels: Record<string, string> = {
   year: '年卡',
   quarter: '季卡',
@@ -35,6 +47,7 @@ const cardKeyTypeLabels: Record<string, string> = {
 export default function UserReferralInfo() {
   const [invitationInfo, setInvitationInfo] =
     useState<UserInvitationInfo | null>(null);
+  const [cardKeyInfo, setCardKeyInfo] = useState<UserCardKeyInfo | null>(null);
   const [config, setConfig] = useState<InvitationConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -49,9 +62,10 @@ export default function UserReferralInfo() {
     setLoading(true);
     setError('');
     try {
-      const [infoRes, configRes] = await Promise.all([
+      const [infoRes, configRes, cardKeyRes] = await Promise.all([
         fetch('/api/invitation/info'),
         fetch('/api/invitation-config'),
+        fetch('/api/user/cardkey'),
       ]);
 
       if (!infoRes.ok) {
@@ -64,6 +78,13 @@ export default function UserReferralInfo() {
       if (configRes.ok) {
         const configData = await configRes.json();
         setConfig(configData);
+      }
+
+      if (cardKeyRes.ok) {
+        const cardKeyData = await cardKeyRes.json();
+        if (cardKeyData.hasCardKey && cardKeyData.cardKeyInfo) {
+          setCardKeyInfo(cardKeyData.cardKeyInfo);
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '获取数据失败');
@@ -189,6 +210,61 @@ export default function UserReferralInfo() {
 
       {invitationInfo && (
         <>
+          {/* 卡密到期时间 */}
+          {cardKeyInfo && (
+            <div className='bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6'>
+              <div className='flex items-center gap-3 mb-4'>
+                <Calendar className='w-6 h-6 text-amber-600 dark:text-amber-400' />
+                <h3 className='text-lg font-medium text-gray-900 dark:text-gray-100'>
+                  卡密状态
+                </h3>
+              </div>
+
+              <div className='p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg'>
+                <div className='flex items-center justify-between'>
+                  <div>
+                    <p className='text-sm text-gray-600 dark:text-gray-400 mb-1'>
+                      到期时间
+                    </p>
+                    <p className='text-lg font-bold text-amber-700 dark:text-amber-300'>
+                      {new Date(cardKeyInfo.expiresAt).toLocaleDateString(
+                        'zh-CN',
+                        {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                        },
+                      )}
+                    </p>
+                  </div>
+                  <div className='text-right'>
+                    <p className='text-sm text-gray-600 dark:text-gray-400 mb-1'>
+                      剩余天数
+                    </p>
+                    <p
+                      className={`text-lg font-bold ${
+                        cardKeyInfo.isExpired
+                          ? 'text-red-600 dark:text-red-400'
+                          : cardKeyInfo.isExpiring
+                            ? 'text-yellow-600 dark:text-yellow-400'
+                            : 'text-green-600 dark:text-green-400'
+                      }`}
+                    >
+                      {cardKeyInfo.isExpired
+                        ? '已过期'
+                        : `${cardKeyInfo.daysRemaining} 天`}
+                    </p>
+                  </div>
+                </div>
+                {cardKeyInfo.isExpiring && !cardKeyInfo.isExpired && (
+                  <p className='text-xs text-yellow-600 dark:text-yellow-400 mt-2'>
+                    卡密即将过期，请及时推荐用户获取积分兑换卡密延期
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className='bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6'>
             <div className='flex items-center gap-3 mb-4'>
               <Users className='w-6 h-6 text-blue-600 dark:text-blue-400' />

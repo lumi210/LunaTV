@@ -788,13 +788,29 @@ function HomeClient() {
                   </div>
                   {welcomeBannerInfo.actionText &&
                     welcomeBannerInfo.actionUrl && (
-                      <Link
-                        href={welcomeBannerInfo.actionUrl}
-                        className='inline-flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400 hover:underline'
-                      >
-                        {welcomeBannerInfo.actionText}
-                        <ChevronRight size={16} />
-                      </Link>
+                      <div className='flex items-center gap-2 text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-3 py-1.5 rounded-lg'>
+                        <span>⏰</span>
+                        <span>
+                          {welcomeBannerInfo.type === 'no_cardkey' ? (
+                            <>
+                              账户将于<strong>7</strong>日后到期，
+                            </>
+                          ) : (
+                            <>
+                              账户将于
+                              <strong>{welcomeBannerInfo.daysRemaining}</strong>
+                              日后到期，
+                            </>
+                          )}
+                          <Link
+                            href={welcomeBannerInfo.actionUrl}
+                            className='underline font-medium hover:text-orange-700 dark:hover:text-orange-300'
+                          >
+                            {welcomeBannerInfo.actionText}
+                          </Link>
+                          获取积分兑换卡密延期
+                        </span>
+                      </div>
                     )}
                 </div>
               )}

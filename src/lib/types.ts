@@ -505,6 +505,7 @@ export interface UserCardKeyInfo {
   daysRemaining: number; // 剩余天数
   isExpiring: boolean; // 30天内过期
   isExpired: boolean; // 是否已过期
+  source?: 'invitation' | 'redeem' | 'manual' | 'promotion_register'; // 卡密来源
 }
 
 // 卡密创建请求
