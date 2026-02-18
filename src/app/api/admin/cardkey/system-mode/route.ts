@@ -3,8 +3,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getAuthInfoFromCookie } from '@/lib/auth';
-import { clearConfigCache, getConfig, updateConfig } from '@/lib/config';
+import { clearConfigCache, getConfig } from '@/lib/config';
 import { cardKeyService } from '@/lib/cardkey';
+import { db } from '@/lib/db';
 
 export const runtime = 'nodejs';
 
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest) {
 
     config.CardKeyConfig = newCardKeyConfig;
 
-    await updateConfig(config);
+    await db.setAdminConfig(config);
     clearConfigCache();
 
     console.log(
