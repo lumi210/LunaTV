@@ -470,6 +470,12 @@ export type CardKeyType = 'year' | 'quarter' | 'month' | 'week';
 // 卡密状态
 export type CardKeyStatus = 'unused' | 'used' | 'expired';
 
+// 卡密来源类型
+export type CardKeySource =
+  | 'admin_created'
+  | 'promotion_register'
+  | 'points_redeem';
+
 // 卡密数据结构
 export interface CardKey {
   key: string; // 卡密密钥（明文）
@@ -480,6 +486,7 @@ export interface CardKey {
   expiresAt: number; // 过期时间戳
   boundTo?: string; // 绑定的用户名
   boundAt?: number; // 绑定时间戳
+  source?: CardKeySource; // 卡密来源
 }
 
 // 卡密过期提醒信息

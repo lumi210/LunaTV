@@ -196,6 +196,8 @@ export interface AdminConfig {
   CardKeyConfig?: {
     enabled: boolean; // 是否启用卡密系统（默认 false）
     requireCardKeyOnRegister: boolean; // 注册时是否必须绑定卡密（默认 true）
+    systemMode?: 'promotion' | 'operation'; // 系统运行模式（默认 operation）
+    promotionCardKeyType?: 'year' | 'quarter' | 'month' | 'week'; // 推广模式自动绑定的卡密类型（默认 week）
   };
   InvitationConfig?: {
     enabled: boolean; // 是否启用邀请奖励系统（默认 false）

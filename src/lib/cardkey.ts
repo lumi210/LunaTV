@@ -5,6 +5,7 @@ import {
   BindCardKeyRequest,
   BindCardKeyResponse,
   CardKey,
+  CardKeySource,
   CardKeyType,
   CardKeyValidationResult,
   CreateCardKeyRequest,
@@ -25,6 +26,7 @@ export class CardKeyService {
   async createCardKey(
     type: CardKeyType,
     count: number = 1,
+    source: CardKeySource = 'admin_created',
   ): Promise<CreateCardKeyResponse> {
     const keys: string[] = [];
 
@@ -39,6 +41,7 @@ export class CardKeyService {
         status: 'unused',
         createdAt: Date.now(),
         expiresAt: this.calculateExpiryDate(type),
+        source,
       };
 
       await db.createCardKey(cardKey);
@@ -367,6 +370,143 @@ export class CardKeyService {
   async verifyCardKeyHash(cardKey: string, hash: string): Promise<boolean> {
     const computedHash = await this.hashCardKey(cardKey);
     return computedHash === hash;
+  }
+
+  // 生成推广卡密并绑定到用户
+  async generateAndBindPromotionCardKey(
+    username: string,
+    cardKeyType: CardKeyType,
+  ): Promise<{ success: boolean; cardKey?: CardKey; error?: string }> {
+    console.log('=== 开始生成推广卡密 ===');
+    console.log('username:', username);
+    console.log('cardKeyType:', cardKeyType);
+
+    try {
+      // 确保用户存在于 users 表
+      await this.ensureUserExists(username);
+
+      // 生成推广卡密
+      const plainKey = this.generateRandomCardKey();
+      const hashedKey = await this.hashCardKey(plainKey);
+      const now = Date.now();
+
+      const cardKey: CardKey = {
+        key: plainKey,
+        keyHash: hashedKey,
+        keyType: cardKeyType,
+        status: 'used', // 直接标记为已使用
+        createdAt: now,
+        expiresAt: this.calculateExpiryDate(cardKeyType),
+        boundTo: username,
+        boundAt: now,
+        source: 'promotion_register',
+      };
+
+      // 保存卡密到数据库
+      await db.createCardKey(cardKey);
+      console.log('推广卡密已创建:', hashedKey);
+
+      // 获取用户当前卡密信息
+      const currentCardKeyInfo = await db.getUserCardKeyInfo(username);
+      console.log('用户当前卡密信息:', currentCardKeyInfo);
+
+      // 计算新的过期时间
+      let newExpiresAt = cardKey.expiresAt;
+
+      if (currentCardKeyInfo) {
+        // 用户已有卡密，累加时间
+        const baseTime =
+          currentCardKeyInfo.expiresAt < now
+            ? now
+            : currentCardKeyInfo.expiresAt;
+        const daysToAdd = CARD_KEY_DURATION[cardKeyType];
+        newExpiresAt = baseTime + daysToAdd * 24 * 60 * 60 * 1000;
+        console.log(
+          `推广卡密 - 用户已有卡密，累加时间: ${daysToAdd}天，新过期时间: ${new Date(newExpiresAt).toLocaleString('zh-CN')}`,
+        );
+      } else {
+        console.log(
+          `推广卡密 - 用户新绑定，过期时间: ${new Date(newExpiresAt).toLocaleString('zh-CN')}`,
+        );
+      }
+
+      // 生成用户卡密记录 ID
+      const userCardKeyId = this.generateUUID();
+
+      // 创建用户卡密记录
+      const userCardKey: import('./types').UserCardKey = {
+        id: userCardKeyId,
+        keyHash: hashedKey,
+        username: username,
+        type: cardKeyType,
+        status: 'used',
+        source: 'promotion_register',
+        createdAt: now,
+        expiresAt: newExpiresAt,
+      };
+
+      // 检查是否已有用户卡密记录
+      const existingUserCardKeys = await db.getUserCardKeys(username);
+      const existingActive = existingUserCardKeys.find(
+        (k) => k.status === 'used' && k.expiresAt > now,
+      );
+
+      if (existingActive) {
+        await db.updateUserCardKey(existingActive.id, {
+          expiresAt: newExpiresAt,
+        });
+        console.log('更新用户卡密记录过期时间:', existingActive.id);
+      } else {
+        await db.addUserCardKey(userCardKey);
+        console.log('创建用户卡密记录:', userCardKeyId);
+      }
+
+      // 更新用户卡密信息（admin_configs）
+      const userCardKeyInfo: import('./admin.types').UserCardKeyData = {
+        boundKey: hashedKey,
+        expiresAt: newExpiresAt,
+        boundAt: now,
+      };
+      await db.updateUserCardKeyInfo(username, userCardKeyInfo);
+
+      console.log('=== 推广卡密生成并绑定完成 ===');
+      return { success: true, cardKey };
+    } catch (error) {
+      console.error('生成推广卡密失败:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : '生成推广卡密失败',
+      };
+    }
+  }
+
+  // 获取推广模式统计
+  async getPromotionStats(): Promise<{
+    totalPromotionCardKeys: number;
+    activePromotionCardKeys: number;
+  }> {
+    try {
+      const allCardKeys = await db.getAllCardKeys();
+      const now = Date.now();
+
+      const promotionCardKeys = allCardKeys.filter(
+        (ck) => ck.source === 'promotion_register',
+      );
+      const activePromotionCardKeys = promotionCardKeys.filter(
+        (ck) => ck.status === 'used' && ck.expiresAt > now,
+      );
+
+      return {
+        totalPromotionCardKeys: promotionCardKeys.length,
+        activePromotionCardKeys: activePromotionCardKeys.length,
+      };
+    } catch (error) {
+      console.error('获取推广统计失败:', error);
+      return {
+        totalPromotionCardKeys: 0,
+        activePromotionCardKeys: 0,
+      };
+    }
   }
 }
 

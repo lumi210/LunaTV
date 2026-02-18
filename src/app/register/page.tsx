@@ -37,6 +37,10 @@ function RegisterPageClient() {
   const [shouldShowRegister, setShouldShowRegister] = useState(false);
   const [registrationDisabled, setRegistrationDisabled] = useState(false);
   const [disabledReason, setDisabledReason] = useState('');
+  const [showCardKeyInput, setShowCardKeyInput] = useState(true);
+  const [systemMode, setSystemMode] = useState<'promotion' | 'operation'>(
+    'operation',
+  );
 
   const { siteName } = useSite();
 
@@ -48,41 +52,31 @@ function RegisterPageClient() {
     }
   }, [searchParams]);
 
+  // 获取注册配置
   useEffect(() => {
-    const checkRegistrationAvailable = async () => {
+    const fetchRegisterConfig = async () => {
       try {
-        const res = await fetch('/api/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: '',
-            password: '',
-            confirmPassword: '',
-          }),
-        });
+        const res = await fetch('/api/register/config');
+        if (res.ok) {
+          const data = await res.json();
+          setShowCardKeyInput(data.showCardKeyInput);
+          setSystemMode(data.systemMode || 'operation');
 
-        const data = await res.json();
-
-        if (data.error === 'localStorage 模式不支持用户注册') {
-          router.replace('/login');
-          return;
-        }
-
-        if (data.error === '管理员已关闭用户注册功能') {
-          setRegistrationDisabled(true);
-          setDisabledReason('管理员已关闭用户注册功能');
+          if (!data.allowRegister) {
+            setRegistrationDisabled(true);
+            setDisabledReason('管理员已关闭用户注册功能');
+          }
           setShouldShowRegister(true);
-          return;
+        } else {
+          setShouldShowRegister(true);
         }
-
-        setShouldShowRegister(true);
       } catch (error) {
         setShouldShowRegister(true);
       }
     };
 
-    checkRegistrationAvailable();
-  }, [router]);
+    fetchRegisterConfig();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -300,31 +294,42 @@ function RegisterPageClient() {
               </div>
             </div>
 
-            <div className='group'>
-              <label
-                htmlFor='cardKey'
-                className='block text-sm font-medium text-orange-900/80 mb-2'
-              >
-                卡密
-              </label>
-              <div className='relative'>
-                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                  <Sparkles className='h-5 w-5 text-orange-300 group-focus-within:text-orange-500 transition-colors' />
+            {showCardKeyInput && (
+              <div className='group'>
+                <label
+                  htmlFor='cardKey'
+                  className='block text-sm font-medium text-orange-900/80 mb-2'
+                >
+                  卡密
+                </label>
+                <div className='relative'>
+                  <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
+                    <Sparkles className='h-5 w-5 text-orange-300 group-focus-within:text-orange-500 transition-colors' />
+                  </div>
+                  <input
+                    id='cardKey'
+                    type='text'
+                    autoComplete='off'
+                    className='block w-full pl-12 pr-4 py-4 rounded-2xl border border-orange-200 bg-white/60 text-orange-900 shadow-sm ring-2 ring-orange-200 focus:ring-orange-500 focus:outline-none focus:bg-white/10 placeholder:text-orange-300 transition-all duration-300 text-base'
+                    placeholder='请输入卡密'
+                    value={cardKey}
+                    onChange={(e) => setCardKey(e.target.value)}
+                  />
                 </div>
-                <input
-                  id='cardKey'
-                  type='text'
-                  autoComplete='off'
-                  className='block w-full pl-12 pr-4 py-4 rounded-2xl border border-orange-200 bg-white/60 text-orange-900 shadow-sm ring-2 ring-orange-200 focus:ring-orange-500 focus:outline-none focus:bg-white/10 placeholder:text-orange-300 transition-all duration-300 text-base'
-                  placeholder='如有卡密请输入'
-                  value={cardKey}
-                  onChange={(e) => setCardKey(e.target.value)}
-                />
+                <p className='mt-2 text-xs text-orange-500/40'>
+                  注册需要绑定卡密才能使用系统功能
+                </p>
               </div>
-              <p className='mt-2 text-xs text-orange-500/40'>
-                注册需要绑定卡密才能使用系统功能
-              </p>
-            </div>
+            )}
+
+            {systemMode === 'promotion' && !showCardKeyInput && (
+              <div className='p-4 rounded-2xl bg-green-100/50 border border-green-200/50 text-green-700 text-sm'>
+                <div className='flex items-center gap-2'>
+                  <CheckCircle className='w-5 h-5' />
+                  <span>推广模式已开启，注册即送免费观影时长</span>
+                </div>
+              </div>
+            )}
 
             <div className='group'>
               <label

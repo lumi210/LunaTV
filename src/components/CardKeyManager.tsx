@@ -8,6 +8,7 @@ import {
   Download,
   Plus,
   RefreshCw,
+  Settings,
   Trash2,
   X,
 } from 'lucide-react';
@@ -30,6 +31,13 @@ const CARD_KEY_STATUS_LABELS: Record<string, string> = {
   expired: '已过期',
 };
 
+// 卡密来源映射
+const CARD_KEY_SOURCE_LABELS: Record<string, string> = {
+  admin_created: '管理员创建',
+  promotion_register: '推广注册',
+  points_redeem: '积分兑换',
+};
+
 interface CardKeyManagerProps {
   onClose?: () => void;
 }
@@ -45,6 +53,19 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
   const [newKeyCount, setNewKeyCount] = useState(1);
   const [createdKeys, setCreatedKeys] = useState<string[]>([]);
   const [showCreatedKeys, setShowCreatedKeys] = useState(false);
+
+  // 系统模式相关状态
+  const [systemMode, setSystemMode] = useState<'promotion' | 'operation'>(
+    'operation',
+  );
+  const [promotionCardKeyType, setPromotionCardKeyType] = useState<
+    'year' | 'quarter' | 'month' | 'week'
+  >('week');
+  const [modeLoading, setModeLoading] = useState(false);
+  const [promotionStats, setPromotionStats] = useState({
+    totalPromotionCardKeys: 0,
+    activePromotionCardKeys: 0,
+  });
 
   // 获取卡密列表
   const fetchCardKeys = useCallback(async () => {
@@ -62,6 +83,59 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
       setLoading(false);
     }
   }, []);
+
+  // 获取系统模式配置
+  const fetchSystemMode = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/cardkey/system-mode');
+      if (!res.ok) {
+        throw new Error(`获取系统模式失败: ${res.status}`);
+      }
+      const data = await res.json();
+      setSystemMode(data.systemMode || 'operation');
+      setPromotionCardKeyType(data.promotionCardKeyType || 'week');
+      setPromotionStats(
+        data.promotionStats || {
+          totalPromotionCardKeys: 0,
+          activePromotionCardKeys: 0,
+        },
+      );
+    } catch (err) {
+      console.error('获取系统模式失败:', err);
+    }
+  }, []);
+
+  // 设置系统模式
+  const handleSetSystemMode = async (
+    mode: 'promotion' | 'operation',
+    cardKeyType?: 'year' | 'quarter' | 'month' | 'week',
+  ) => {
+    setModeLoading(true);
+    try {
+      const res = await fetch('/api/admin/cardkey/system-mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemMode: mode,
+          ...(cardKeyType && { promotionCardKeyType: cardKeyType }),
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `设置失败: ${res.status}`);
+      }
+
+      const data = await res.json();
+      setSystemMode(data.systemMode);
+      setPromotionCardKeyType(data.promotionCardKeyType);
+      setPromotionStats(data.promotionStats);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '设置系统模式失败');
+    } finally {
+      setModeLoading(false);
+    }
+  };
 
   // 创建卡密
   const handleCreateCardKeys = async () => {
@@ -220,10 +294,141 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
 
   useEffect(() => {
     fetchCardKeys();
-  }, [fetchCardKeys]);
+    fetchSystemMode();
+  }, [fetchCardKeys, fetchSystemMode]);
 
   return (
     <div className='space-y-6'>
+      {/* 系统模式设置区域 */}
+      <div className='bg-gradient-to-r from-blue-50/50 via-indigo-50/50 to-purple-50/50 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 backdrop-blur-3xl p-6 rounded-2xl border border-blue-200/30 dark:border-blue-800/30 shadow-xl shadow-blue-500/10'>
+        <div className='flex items-center gap-3 mb-4'>
+          <div className='relative'>
+            <div className='absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl blur-xl opacity-30 animate-pulse-soft' />
+            <div className='relative p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg shadow-blue-500/30'>
+              <Settings className='w-6 h-6 text-white' />
+            </div>
+          </div>
+          <div>
+            <h3 className='text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent'>
+              系统模式设置
+            </h3>
+            <p className='text-sm text-gray-600 dark:text-gray-400 mt-1'>
+              切换推广模式或运营模式，控制用户注册流程
+            </p>
+          </div>
+        </div>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
+          {/* 推广模式 */}
+          <button
+            type='button'
+            onClick={() => handleSetSystemMode('promotion')}
+            disabled={modeLoading}
+            className={`relative p-4 rounded-xl border-2 transition-all duration-300 text-left ${
+              systemMode === 'promotion'
+                ? 'border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 shadow-lg shadow-green-500/20'
+                : 'border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-700 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+            }`}
+          >
+            <div className='flex items-center gap-3 mb-2'>
+              <div
+                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                  systemMode === 'promotion'
+                    ? 'border-green-500 bg-green-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                }`}
+              >
+                {systemMode === 'promotion' && (
+                  <CheckCircle className='w-3 h-3 text-white' />
+                )}
+              </div>
+              <span className='font-bold text-gray-900 dark:text-white'>
+                推广模式
+              </span>
+            </div>
+            <p className='text-sm text-gray-600 dark:text-gray-400 ml-8'>
+              新用户注册时自动生成并绑定指定类型卡密，无需用户输入卡密
+            </p>
+          </button>
+
+          {/* 运营模式 */}
+          <button
+            type='button'
+            onClick={() => handleSetSystemMode('operation')}
+            disabled={modeLoading}
+            className={`relative p-4 rounded-xl border-2 transition-all duration-300 text-left ${
+              systemMode === 'operation'
+                ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 shadow-lg shadow-blue-500/20'
+                : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+            }`}
+          >
+            <div className='flex items-center gap-3 mb-2'>
+              <div
+                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                  systemMode === 'operation'
+                    ? 'border-blue-500 bg-blue-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                }`}
+              >
+                {systemMode === 'operation' && (
+                  <CheckCircle className='w-3 h-3 text-white' />
+                )}
+              </div>
+              <span className='font-bold text-gray-900 dark:text-white'>
+                运营模式
+              </span>
+            </div>
+            <p className='text-sm text-gray-600 dark:text-gray-400 ml-8'>
+              用户注册时需手动输入卡密，保持现有注册机制
+            </p>
+          </button>
+        </div>
+
+        {/* 推广模式配置 */}
+        {systemMode === 'promotion' && (
+          <div className='bg-white/50 dark:bg-gray-800/50 rounded-xl p-4 border border-green-200/30 dark:border-green-800/30'>
+            <div className='flex flex-col sm:flex-row sm:items-center gap-4'>
+              <div className='flex-1'>
+                <label className='block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2'>
+                  推广卡密类型
+                </label>
+                <select
+                  value={promotionCardKeyType}
+                  onChange={(e) =>
+                    handleSetSystemMode(
+                      'promotion',
+                      e.target.value as 'year' | 'quarter' | 'month' | 'week',
+                    )
+                  }
+                  disabled={modeLoading}
+                  className='w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900 dark:text-white'
+                >
+                  <option value='year'>1年（365天）</option>
+                  <option value='quarter'>1季（90天）</option>
+                  <option value='month'>1月（30天）</option>
+                  <option value='week'>1周（7天）</option>
+                </select>
+              </div>
+              <div className='flex-1'>
+                <div className='text-sm text-gray-600 dark:text-gray-400'>
+                  <span className='font-medium text-gray-900 dark:text-white'>
+                    推广统计：
+                  </span>
+                  已生成 {promotionStats.totalPromotionCardKeys} 张推广卡密，
+                  有效 {promotionStats.activePromotionCardKeys} 张
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {modeLoading && (
+          <div className='absolute inset-0 bg-white/50 dark:bg-gray-900/50 rounded-2xl flex items-center justify-center'>
+            <RefreshCw className='w-6 h-6 animate-spin text-blue-500' />
+          </div>
+        )}
+      </div>
+
       {/* 页面标题和操作栏 */}
       <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-orange-50/50 via-amber-50/50 to-yellow-50/50 dark:from-orange-950/20 dark:via-amber-950/20 dark:to-yellow-950/20 backdrop-blur-3xl p-6 rounded-2xl border border-orange-200/30 dark:border-orange-800/30 shadow-xl shadow-orange-500/10'>
         <div className='flex items-center gap-3'>
@@ -310,6 +515,9 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
                   状态
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-bold tracking-wider uppercase text-orange-900 dark:text-orange-200'>
+                  来源
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-bold tracking-wider uppercase text-orange-900 dark:text-orange-200'>
                   创建时间
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-bold tracking-wider uppercase text-orange-900 dark:text-orange-200'>
@@ -326,7 +534,7 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
             <tbody className='divide-y divide-orange-100/30 dark:divide-orange-900/30'>
               {loading && cardKeys.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className='px-6 py-12 text-center'>
+                  <td colSpan={8} className='px-6 py-12 text-center'>
                     <div className='flex flex-col items-center justify-center gap-4'>
                       <div className='relative'>
                         <div className='w-16 h-16 border-4 border-orange-200 dark:border-orange-800 rounded-full' />
@@ -340,7 +548,7 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
                 </tr>
               ) : cardKeys.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className='px-6 py-12 text-center'>
+                  <td colSpan={8} className='px-6 py-12 text-center'>
                     <div className='flex flex-col items-center justify-center gap-4'>
                       <div className='relative'>
                         <div className='absolute inset-0 bg-gradient-to-br from-orange-400 via-amber-400 to-yellow-400 rounded-full blur-2xl opacity-20' />
@@ -400,6 +608,23 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
                           {CARD_KEY_STATUS_LABELS[cardKey.status]}
                         </span>
                       )}
+                    </td>
+                    <td className='px-6 py-4 text-sm'>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${
+                          cardKey.source === 'promotion_register'
+                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 text-green-700 dark:text-green-300 border border-green-200/30 dark:border-green-800/30'
+                            : cardKey.source === 'points_redeem'
+                              ? 'bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 text-purple-700 dark:text-purple-300 border border-purple-200/30 dark:border-purple-800/30'
+                              : 'bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-950/30 dark:to-slate-950/30 text-gray-600 dark:text-gray-400 border border-gray-200/30 dark:border-gray-800/30'
+                        }`}
+                      >
+                        {
+                          CARD_KEY_SOURCE_LABELS[
+                            cardKey.source || 'admin_created'
+                          ]
+                        }
+                      </span>
                     </td>
                     <td className='px-6 py-4 text-sm text-gray-700 dark:text-gray-300 font-medium'>
                       {formatDate(cardKey.createdAt)}
