@@ -1509,63 +1509,109 @@ export class UpstashRedisStorage implements IStorage {
     console.log('userName:', userName);
 
     const userCardKeyInfo = await this.getUserCardKeyInfo(userName);
-    if (!userCardKeyInfo) {
-      console.log('userCardKeyInfo 不存在,返回 null');
-      return null;
-    }
-    console.log('userCardKeyInfo:', JSON.stringify(userCardKeyInfo, null, 2));
+    if (userCardKeyInfo) {
+      console.log('userCardKeyInfo:', JSON.stringify(userCardKeyInfo, null, 2));
 
-    // 获取卡密详细信息
-    const allCardKeys = await this.getAllCardKeys();
-    console.log('getFullUserCardKey - allCardKeys count:', allCardKeys.length);
-
-    if (allCardKeys.length > 0) {
+      // 获取卡密详细信息
+      const allCardKeys = await this.getAllCardKeys();
       console.log(
-        'getFullUserCardKey - 前几个卡密的 keyHash:',
-        allCardKeys.slice(0, 3).map((ck) => ck.keyHash),
+        'getFullUserCardKey - allCardKeys count:',
+        allCardKeys.length,
       );
+
+      if (allCardKeys.length > 0) {
+        console.log(
+          'getFullUserCardKey - 前几个卡密的 keyHash:',
+          allCardKeys.slice(0, 3).map((ck) => ck.keyHash),
+        );
+      }
+
+      const cardKey = allCardKeys.find(
+        (ck) => ck.keyHash === userCardKeyInfo.boundKey,
+      );
+      console.log(
+        'getFullUserCardKey - 查找 boundKey:',
+        userCardKeyInfo.boundKey,
+      );
+      console.log('getFullUserCardKey - found cardKey:', cardKey);
+
+      // 使用 userCardKeyInfo.expiresAt 计算剩余天数（这是延期后的实际过期时间）
+      const now = Date.now();
+      const daysRemaining = Math.max(
+        0,
+        Math.ceil((userCardKeyInfo.expiresAt - now) / (1000 * 60 * 60 * 24)),
+      );
+      const isExpired = userCardKeyInfo.expiresAt < now;
+      const isExpiring = !isExpired && daysRemaining <= 30;
+
+      const result = {
+        plainKey: cardKey?.key,
+        boundKey: userCardKeyInfo.boundKey,
+        expiresAt: userCardKeyInfo.expiresAt,
+        boundAt: userCardKeyInfo.boundAt,
+        daysRemaining,
+        isExpiring,
+        isExpired,
+      };
+
+      console.log(
+        'getFullUserCardKey - 返回结果:',
+        JSON.stringify(result, null, 2),
+      );
+      console.log('=== getFullUserCardKey 结束 (Upstash) ===');
+      return result;
     }
 
-    const cardKey = allCardKeys.find(
-      (ck) => ck.keyHash === userCardKeyInfo.boundKey,
-    );
-    console.log(
-      'getFullUserCardKey - 查找 boundKey:',
-      userCardKeyInfo.boundKey,
-    );
-    console.log('getFullUserCardKey - found cardKey:', cardKey);
+    // 如果 getUserCardKeyInfo 返回 null，尝试从 getUserCardKeys 获取
+    console.log('userCardKeyInfo 不存在，尝试从 getUserCardKeys 获取');
+    const userCardKeys = await this.getUserCardKeys(userName);
+    console.log('getUserCardKeys 返回:', userCardKeys.length, '条记录');
 
-    if (!cardKey) {
-      console.error(
-        '未找到匹配的卡密, boundKey:',
-        userCardKeyInfo.boundKey,
-        '所有卡密 keyHash:',
-        allCardKeys.map((ck) => ck.keyHash),
-      );
+    if (userCardKeys.length === 0) {
+      console.log('getUserCardKeys 也无数据，返回 null');
       return null;
     }
 
-    // 使用 userCardKeyInfo.expiresAt 计算剩余天数（这是延期后的实际过期时间）
+    // 优先查找 used 状态且未过期的卡密
     const now = Date.now();
+    const activeKey = userCardKeys.find(
+      (k) => k.status === 'used' && k.expiresAt > now,
+    );
+
+    // 如果没有活跃卡密，查找 unused 状态的卡密
+    const targetKey =
+      activeKey || userCardKeys.find((k) => k.status === 'unused');
+
+    if (!targetKey) {
+      console.log('没有找到有效卡密，返回 null');
+      return null;
+    }
+
+    console.log('找到卡密:', targetKey);
+
+    // 获取卡密明文
+    const allCardKeys = await this.getAllCardKeys();
+    const cardKey = allCardKeys.find((ck) => ck.keyHash === targetKey.keyHash);
+
     const daysRemaining = Math.max(
       0,
-      Math.ceil((userCardKeyInfo.expiresAt - now) / (1000 * 60 * 60 * 24)),
+      Math.ceil((targetKey.expiresAt - now) / (1000 * 60 * 60 * 24)),
     );
-    const isExpired = userCardKeyInfo.expiresAt < now;
+    const isExpired = targetKey.expiresAt < now;
     const isExpiring = !isExpired && daysRemaining <= 30;
 
     const result = {
-      plainKey: cardKey.key,
-      boundKey: userCardKeyInfo.boundKey,
-      expiresAt: userCardKeyInfo.expiresAt,
-      boundAt: userCardKeyInfo.boundAt,
+      plainKey: cardKey?.key,
+      boundKey: targetKey.keyHash,
+      expiresAt: targetKey.expiresAt,
+      boundAt: targetKey.createdAt,
       daysRemaining,
       isExpiring,
       isExpired,
     };
 
     console.log(
-      'getFullUserCardKey - 返回结果:',
+      'getFullUserCardKey - 从 getUserCardKeys 返回结果:',
       JSON.stringify(result, null, 2),
     );
     console.log('=== getFullUserCardKey 结束 (Upstash) ===');
