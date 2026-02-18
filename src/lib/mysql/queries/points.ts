@@ -102,9 +102,15 @@ export async function updateUserPoints(
 export async function setUserPoints(points: UserPoints): Promise<boolean> {
   const result = await executeUpdate(
     `UPDATE user_points 
-     SET balance = ?, total_earned = ?, total_redeemed = ?
+     SET balance = ?, total_earned = ?, total_redeemed = ?, invitation_code = ?
      WHERE username = ?`,
-    [points.balance, points.totalEarned, points.totalRedeemed, points.username],
+    [
+      points.balance,
+      points.totalEarned,
+      points.totalRedeemed,
+      points.invitationCode,
+      points.username,
+    ],
   );
   return result.affectedRows > 0;
 }

@@ -911,6 +911,7 @@ export class HybridStorage implements IStorage {
         daysRemaining,
         isExpiring,
         isExpired,
+        source: activeKey.source as UserCardKeyInfo['source'],
       };
     }
 
@@ -937,6 +938,7 @@ export class HybridStorage implements IStorage {
         daysRemaining,
         isExpiring,
         isExpired,
+        source: unusedKey.source as UserCardKeyInfo['source'],
       };
     }
 
