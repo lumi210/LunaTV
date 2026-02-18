@@ -95,12 +95,6 @@ export default function UserReferralInfo() {
     }
   };
 
-  const getReferralLink = () => {
-    if (!invitationInfo?.code) return '';
-    const baseUrl = window.location.origin;
-    return `${baseUrl}/register?invitationCode=${invitationInfo.code}`;
-  };
-
   const handleRedeem = async () => {
     if (!config) return;
 
@@ -221,25 +215,6 @@ export default function UserReferralInfo() {
                 >
                   <Copy className='w-5 h-5 text-blue-600 dark:text-blue-400' />
                 </button>
-              </div>
-
-              <div className='p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg'>
-                <p className='text-sm text-gray-600 dark:text-gray-400 mb-2'>
-                  推广链接
-                </p>
-                <div className='flex items-center gap-2'>
-                  <code className='flex-1 text-xs font-mono text-gray-700 dark:text-gray-300 break-all'>
-                    {getReferralLink()}
-                  </code>
-                  <button
-                    type='button'
-                    onClick={() => copyToClipboard(getReferralLink())}
-                    className='p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors flex-shrink-0'
-                    title='复制链接'
-                  >
-                    <Copy className='w-4 h-4 text-gray-600 dark:text-gray-400' />
-                  </button>
-                </div>
               </div>
             </div>
           </div>
