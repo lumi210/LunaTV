@@ -184,25 +184,42 @@ export class CardKeyService {
       boundAt: Date.now(),
     });
 
-    // 生成用户卡密记录 ID
-    const userCardKeyId = this.generateUUID();
-
-    // 创建用户卡密记录（用于 getUserCardKey 查询）
-    const userCardKey: import('./types').UserCardKey = {
-      id: userCardKeyId,
-      keyHash: hashedKey,
-      username: username,
-      type: validation.cardKey!.keyType,
-      status: 'used',
-      source: 'redeem',
-      createdAt: Date.now(),
-      expiresAt: newExpiresAt,
-    };
-
-    // 检查是否已有用户卡密记录，如果有则更新
+    // 检查是否已有该卡密对应的用户卡密记录（积分兑换的卡密）
     const existingUserCardKeys = await db.getUserCardKeys(username);
+    const existingCardKeyRecord = existingUserCardKeys.find(
+      (k) => k.keyHash === hashedKey,
+    );
+
+    if (existingCardKeyRecord) {
+      // 更新已存在的卡密记录状态为已使用，并更新过期时间
+      await db.updateUserCardKey(existingCardKeyRecord.id, {
+        status: 'used',
+        expiresAt: newExpiresAt,
+      });
+      console.log('更新用户卡密记录状态和过期时间:', existingCardKeyRecord.id);
+    } else {
+      // 创建新的用户卡密记录
+      const userCardKeyId = this.generateUUID();
+      const userCardKey: import('./types').UserCardKey = {
+        id: userCardKeyId,
+        keyHash: hashedKey,
+        username: username,
+        type: validation.cardKey!.keyType,
+        status: 'used',
+        source: 'redeem',
+        createdAt: Date.now(),
+        expiresAt: newExpiresAt,
+      };
+      await db.addUserCardKey(userCardKey);
+      console.log('创建用户卡密记录:', userCardKeyId);
+    }
+
+    // 检查是否有其他活跃的卡密记录需要更新过期时间
     const existingActive = existingUserCardKeys.find(
-      (k) => k.status === 'used' && k.expiresAt > Date.now(),
+      (k) =>
+        k.status === 'used' &&
+        k.keyHash !== hashedKey &&
+        k.expiresAt > Date.now(),
     );
 
     if (existingActive) {
@@ -210,11 +227,7 @@ export class CardKeyService {
       await db.updateUserCardKey(existingActive.id, {
         expiresAt: newExpiresAt,
       });
-      console.log('更新用户卡密记录过期时间:', existingActive.id);
-    } else {
-      // 创建新的用户卡密记录
-      await db.addUserCardKey(userCardKey);
-      console.log('创建用户卡密记录:', userCardKeyId);
+      console.log('更新其他活跃卡密记录过期时间:', existingActive.id);
     }
 
     // 更新用户卡密信息（admin_configs）
