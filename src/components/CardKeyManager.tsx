@@ -673,35 +673,8 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
       {/* 创建卡密弹窗 */}
       {showCreateModal && (
         <div className='fixed inset-0 flex items-center justify-center z-50 p-4'>
-          {/* 动态背景 */}
-          <div className='absolute inset-0 bg-gradient-to-br from-indigo-900/95 via-purple-900/90 to-pink-900/95 animate-gradient-x pointer-events-none' />
-          <div
-            className='absolute inset-0 bg-gradient-to-tr from-blue-900/80 via-cyan-900/80 to-teal-900/80 animate-gradient-y pointer-events-none'
-            style={{
-              animationDuration: '3s',
-              animationIterationCount: 'infinite',
-            }}
-          />
-
-          {/* 浮动粒子效果 */}
-          <div className='absolute inset-0 overflow-hidden pointer-events-none'>
-            <div
-              className='absolute top-1/4 left-1/4 w-2 h-2 bg-white/10 rounded-full animate-float'
-              style={{ animationDelay: '0s' }}
-            />
-            <div
-              className='absolute top-1/2 right-1/4 w-3 h-3 bg-white/10 rounded-full animate-float'
-              style={{ animationDelay: '1s' }}
-            />
-            <div
-              className='absolute bottom-1/3 left-1/3 w-2 h-2 bg-white/10 rounded-full animate-float'
-              style={{ animationDelay: '2s' }}
-            />
-            <div
-              className='absolute top-1/3 right-1/3 w-2.5 h-2.5 bg-white/10 rounded-full animate-float'
-              style={{ animationDelay: '1.5s' }}
-            />
-          </div>
+          {/* 透明背景遮罩 */}
+          <div className='absolute inset-0 bg-black/50 backdrop-blur-sm pointer-events-none' />
 
           {/* 弹窗容器 - 玻璃态效果 */}
           <div className='relative w-full max-w-2xl max-h-[85vh] flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/50 p-8'>
