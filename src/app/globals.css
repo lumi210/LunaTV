@@ -984,11 +984,11 @@ html:not(.dark) .hover\:bg-slate-50:hover {
     background: rgba(255, 255, 255, 0.98) !important;
   }
 
-   .dark .from-zinc-900\/95.backdrop-blur-2xl,
-   .dark .from-zinc-900\/85.backdrop-blur-2xl,
-   .dark .from-zinc-900\/75.backdrop-blur-2xl {
-     background: rgba(24, 24, 27, 0.98) !important;
-   }
+  .dark .from-zinc-900\/95.backdrop-blur-2xl,
+  .dark .from-zinc-900\/85.backdrop-blur-2xl,
+  .dark .from-zinc-900\/75.backdrop-blur-2xl {
+    background: rgba(24, 24, 27, 0.98) !important;
+  }
 }
 
 /* ============================================
@@ -997,7 +997,8 @@ html:not(.dark) .hover\:bg-slate-50:hover {
 
 /* 浮动动画 */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) translateX(0);
   }
   50% {
@@ -1011,7 +1012,8 @@ html:not(.dark) .hover\:bg-slate-50:hover {
 
 /* 渐变背景动画 */
 @keyframes gradient-x {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -1020,10 +1022,11 @@ html:not(.dark) .hover\:bg-slate-50:hover {
 }
 
 @keyframes gradient-y {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 50% 0%;
   }
- 50% {
+  50% {
     background-position: 50% 100%;
   }
 }
@@ -1044,13 +1047,13 @@ html:not(.dark) .hover\:bg-slate-50:hover {
     transform: scale(0.5);
     opacity: 0;
   }
- 50% {
+  50% {
     transform: scale(1);
   }
   70% {
     transform: scale(0.9);
   }
- 100% {
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -1062,7 +1065,8 @@ html:not(.dark) .hover\:bg-slate-50:hover {
 
 /* 脉冲动画 */
 @keyframes pulse-slow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
   }
   50% {
@@ -1076,7 +1080,8 @@ html:not(.dark) .hover\:bg-slate-50:hover {
 
 /* 脉冲发光 */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.2;
   }
   50% {
@@ -1101,7 +1106,8 @@ html:not(.dark) .hover\:bg-slate-50:hover {
 
 /* 浮动动画 */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) translateX(0px);
   }
   50% {
@@ -1115,7 +1121,8 @@ html:not(.dark) .hover\:bg-slate-50:hover {
 
 /* 渐变背景动画 */
 @keyframes gradient-x {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -1124,7 +1131,8 @@ html:not(.dark) .hover\:bg-slate-50:hover {
 }
 
 @keyframes gradient-y {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 50% 0%;
   }
   50% {
@@ -1145,7 +1153,8 @@ html:not(.dark) .hover\:bg-slate-50:hover {
 /* 弹跳动画 */
 @keyframes bounce-in {
   0% {
-    transform: scale(0.5) opacity: 0;
+    transform: scale(0.5);
+    opacity: 0;
   }
   50% {
     transform: scale(1);
@@ -1153,7 +1162,7 @@ html:not(.dark) .hover\:bg-slate-50:hover {
   70% {
     transform: scale(0.9);
   }
- 100% {
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -1165,7 +1174,8 @@ html:not(.dark) .hover\:bg-slate-50:hover {
 
 /* 脉冲动画 */
 @keyframes pulse-slow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
   }
   50% {
@@ -1179,7 +1189,8 @@ html:not(.dark) .hover\:bg-slate-50:hover {
 
 /* 脉冲发光 */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.2;
   }
   50% {
