@@ -909,12 +909,24 @@ export class HybridStorage implements IStorage {
 
   async getUserCardKey(userName: string): Promise<UserCardKeyInfo | null> {
     incrementDbQuery();
-    const activeKey = await statsQueries.getActiveUserCardKey(userName);
-    if (activeKey) {
-      const cardKeys = await cardKeyQueries.getAllCardKeys();
-      const cardKey = cardKeys.find((ck) => ck.key_hash === activeKey.key_hash);
 
-      const now = Date.now();
+    // 获取用户所有卡密记录
+    const userCardKeys = await statsQueries.getUserCardKeys(userName);
+    if (userCardKeys.length === 0) {
+      return null;
+    }
+
+    const allCardKeys = await cardKeyQueries.getAllCardKeys();
+    const now = Date.now();
+
+    // 优先查找已使用且未过期的卡密
+    const activeKey = userCardKeys.find(
+      (k) => k.status === 'used' && k.expires_at.getTime() > now,
+    );
+    if (activeKey) {
+      const cardKey = allCardKeys.find(
+        (ck) => ck.key_hash === activeKey.key_hash,
+      );
       const expiresAtTime = activeKey.expires_at.getTime();
       const daysRemaining = Math.max(
         0,
@@ -935,13 +947,38 @@ export class HybridStorage implements IStorage {
       };
     }
 
-    const userCardKeys = await statsQueries.getUserCardKeys(userName);
+    // 查找已使用但已过期的卡密
+    const usedKey = userCardKeys.find((k) => k.status === 'used');
+    if (usedKey) {
+      const cardKey = allCardKeys.find(
+        (ck) => ck.key_hash === usedKey.key_hash,
+      );
+      const expiresAtTime = usedKey.expires_at.getTime();
+      const daysRemaining = Math.max(
+        0,
+        Math.ceil((expiresAtTime - now) / (1000 * 60 * 60 * 24)),
+      );
+      const isExpired = expiresAtTime < now;
+      const isExpiring = !isExpired && daysRemaining <= 30;
+
+      return {
+        plainKey: cardKey?.plain_key || undefined,
+        boundKey: usedKey.key_hash,
+        expiresAt: expiresAtTime,
+        boundAt: usedKey.created_at.getTime(),
+        daysRemaining,
+        isExpiring,
+        isExpired,
+        source: usedKey.source as UserCardKeyInfo['source'],
+      };
+    }
+
+    // 最后查找未使用的卡密
     const unusedKey = userCardKeys.find((k) => k.status === 'unused');
     if (unusedKey) {
-      const cardKeys = await cardKeyQueries.getAllCardKeys();
-      const cardKey = cardKeys.find((ck) => ck.key_hash === unusedKey.key_hash);
-
-      const now = Date.now();
+      const cardKey = allCardKeys.find(
+        (ck) => ck.key_hash === unusedKey.key_hash,
+      );
       const expiresAtTime = unusedKey.expires_at.getTime();
       const daysRemaining = Math.max(
         0,
