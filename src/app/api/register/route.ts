@@ -207,137 +207,119 @@ export async function POST(req: NextRequest) {
         console.log('推广卡密预生成成功:', plainKey);
       }
 
-      // 如果有卡密或有默认用户组或邀请码，使用 V2 注册；否则使用 V1 注册（保持兼容性）
-      if (cardKey || promotionCardKeyToBind || defaultTags || invitationCode) {
-        // 验证邀请码
-        let inviter: string | undefined;
-        if (invitationCode) {
-          console.log('=== 开始验证邀请码 ===');
-          console.log('邀请码:', invitationCode);
-          const { InvitationService } = await import('@/lib/invitation-points');
-          const validation =
-            await InvitationService.validateInvitationCode(invitationCode);
-          console.log('邀请码验证结果:', validation);
-          if (validation.valid && validation.inviter) {
-            inviter = validation.inviter;
-            console.log('找到邀请人:', inviter);
-          } else {
-            console.log('邀请码无效或未找到邀请人');
-          }
-          console.log('=== 邀请码验证完成 ===');
-        }
-
-        // V2 注册（支持卡密和 tags）
-        await db.createUserV2(
-          username,
-          password,
-          'user',
-          defaultTags, // 默认分组
-          undefined, // oidcSub
-          undefined, // enabledApis
-          cardKey || promotionCardKeyToBind, // 注册卡密
-          inviter, // 邀请人
-        );
-
-        // 为新注册的用户生成专属邀请码
-        try {
-          const { InvitationService } = await import('@/lib/invitation-points');
-          const userInvitationCode =
-            await InvitationService.generateInvitationCode(username);
-          console.log(
-            `✓ 用户 ${username} 的专属邀请码已生成: ${userInvitationCode}`,
-          );
-        } catch (error) {
-          console.error(`生成用户 ${username} 的邀请码失败:`, error);
-          // 不影响注册流程
-        }
-
-        // 处理邀请奖励
-        if (inviter) {
-          try {
-            const { InvitationService, PointsService } =
-              await import('@/lib/invitation-points');
-
-            console.log('=== 开始处理邀请奖励 ===');
-            console.log('邀请人:', inviter);
-            console.log('被邀请人:', username);
-            console.log('邀请码:', invitationCode);
-
-            // 获取邀请配置
-            const config = await db.getInvitationConfig();
-            console.log('邀请配置:', config);
-
-            if (config?.enabled) {
-              // 检查IP是否已奖励过
-              const clientIp =
-                req.headers.get('x-forwarded-for')?.split(',')[0] ||
-                req.headers.get('x-real-ip') ||
-                'unknown';
-              console.log('客户端IP:', clientIp);
-
-              const ipRewarded =
-                await InvitationService.checkIPRewarded(clientIp);
-              console.log('IP是否已奖励:', ipRewarded);
-
-              if (!ipRewarded) {
-                // 创建推荐关系
-                await InvitationService.createReferral(
-                  inviter,
-                  username,
-                  invitationCode,
-                  clientIp,
-                );
-                console.log('推荐关系创建成功');
-
-                // 发放积分奖励
-                console.log('准备发放积分奖励:', config.rewardPoints);
-                await PointsService.addPoints(
-                  inviter,
-                  config.rewardPoints,
-                  '邀请好友注册',
-                  username,
-                );
-                console.log('积分奖励发放成功');
-
-                // 记录IP奖励
-                await db.createIPRewardRecord({
-                  id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                  ipAddress: clientIp,
-                  inviter,
-                  invitee: username,
-                  rewardTime: Date.now(),
-                });
-                console.log('IP奖励记录创建成功');
-              } else {
-                console.log('IP已奖励过，跳过积分奖励');
-              }
-            } else {
-              console.log('邀请功能未启用');
-            }
-            console.log('=== 邀请奖励处理完成 ===');
-          } catch (error) {
-            console.error('处理邀请奖励失败:', error);
-            // 不影响注册流程，只记录错误
-          }
+      // 总是使用 V2 注册（支持卡密和 tags）
+      // 验证邀请码
+      let inviter: string | undefined;
+      if (invitationCode) {
+        console.log('=== 开始验证邀请码 ===');
+        console.log('邀请码:', invitationCode);
+        const { InvitationService } = await import('@/lib/invitation-points');
+        const validation =
+          await InvitationService.validateInvitationCode(invitationCode);
+        console.log('邀请码验证结果:', validation);
+        if (validation.valid && validation.inviter) {
+          inviter = validation.inviter;
+          console.log('找到邀请人:', inviter);
         } else {
-          console.log('没有邀请人，跳过邀请奖励处理');
+          console.log('邀请码无效或未找到邀请人');
+        }
+        console.log('=== 邀请码验证完成 ===');
+      }
+
+      // V2 注册（支持卡密和 tags）
+      await db.createUserV2(
+        username,
+        password,
+        'user',
+        defaultTags, // 默认分组
+        undefined, // oidcSub
+        undefined, // enabledApis
+        cardKey || promotionCardKeyToBind, // 注册卡密
+        inviter, // 邀请人
+      );
+
+      // 为新注册的用户生成专属邀请码
+      try {
+        const { InvitationService } = await import('@/lib/invitation-points');
+        const userInvitationCode =
+          await InvitationService.generateInvitationCode(username);
+        console.log(
+          `✓ 用户 ${username} 的专属邀请码已生成: ${userInvitationCode}`,
+        );
+      } catch (error) {
+        console.error(`生成用户 ${username} 的邀请码失败:`, error);
+        // 不影响注册流程
+      }
+
+      // 处理邀请奖励
+      if (inviter) {
+        try {
+          const { InvitationService, PointsService } =
+            await import('@/lib/invitation-points');
+
+          console.log('=== 开始处理邀请奖励 ===');
+          console.log('邀请人:', inviter);
+          console.log('被邀请人:', username);
+          console.log('邀请码:', invitationCode);
+
+          // 获取邀请配置
+          const config = await db.getInvitationConfig();
+          console.log('邀请配置:', config);
+
+          if (config?.enabled) {
+            // 检查IP是否已奖励过
+            const clientIp =
+              req.headers.get('x-forwarded-for')?.split(',')[0] ||
+              req.headers.get('x-real-ip') ||
+              'unknown';
+            console.log('客户端IP:', clientIp);
+
+            const ipRewarded =
+              await InvitationService.checkIPRewarded(clientIp);
+            console.log('IP是否已奖励:', ipRewarded);
+
+            if (!ipRewarded) {
+              // 创建推荐关系
+              await InvitationService.createReferral(
+                inviter,
+                username,
+                invitationCode,
+                clientIp,
+              );
+              console.log('推荐关系创建成功');
+
+              // 发放积分奖励
+              console.log('准备发放积分奖励:', config.rewardPoints);
+              await PointsService.addPoints(
+                inviter,
+                config.rewardPoints,
+                '邀请好友注册',
+                username,
+              );
+              console.log('积分奖励发放成功');
+
+              // 记录IP奖励
+              await db.createIPRewardRecord({
+                id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                ipAddress: clientIp,
+                inviter,
+                invitee: username,
+                rewardTime: Date.now(),
+              });
+              console.log('IP奖励记录创建成功');
+            } else {
+              console.log('IP已奖励过，跳过积分奖励');
+            }
+          } else {
+            console.log('邀请功能未启用');
+          }
+          console.log('=== 邀请奖励处理完成 ===');
+        } catch (error) {
+          console.error('处理邀请奖励失败:', error);
+          // 不影响注册流程，只记录错误
         }
       } else {
-        // V1 注册（无卡密和无tags，保持现有行为）
-        await db.registerUser(username, password);
-
-        // 为V1注册的用户也生成邀请码
-        try {
-          const { InvitationService } = await import('@/lib/invitation-points');
-          const userInvitationCode =
-            await InvitationService.generateInvitationCode(username);
-          console.log(
-            `✓ V1用户 ${username} 的专属邀请码已生成: ${userInvitationCode}`,
-          );
-        } catch (error) {
-          console.error(`生成V1用户 ${username} 的邀请码失败:`, error);
-          // 不影响注册流程
-        }
+        console.log('没有邀请人，跳过邀请奖励处理');
       }
 
       // 清除缓存，让 configSelfCheck 从数据库同步最新用户列表（包括 tags）
