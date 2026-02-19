@@ -40,8 +40,25 @@ export async function GET(request: NextRequest) {
     const config = await db.getAdminConfig();
     const user = config.UserConfig.Users.find((u) => u.username === username);
 
+    console.log(
+      '从 AdminConfig.Users 查找用户:',
+      user
+        ? {
+            username: user.username,
+            role: user.role,
+            hasCardKey: !!user.cardKey,
+          }
+        : null,
+    );
+
     if (!user) {
-      console.log('用户不存在');
+      console.log('用户不存在于 AdminConfig.Users，尝试从数据库查找');
+      try {
+        const userInfo = await (db as any).storage.getUserInfoV2(username);
+        console.log('从数据库找到用户:', userInfo);
+      } catch (error) {
+        console.error('从数据库查找用户失败:', error);
+      }
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
