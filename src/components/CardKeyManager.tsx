@@ -77,7 +77,11 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
         throw new Error(`获取卡密列表失败: ${res.status}`);
       }
       const data = await res.json();
-      setCardKeys(data.cardKeys || []);
+      // 过滤掉已使用的卡密
+      const filteredKeys = (data.cardKeys || []).filter(
+        (key: CardKey) => key.status !== 'used',
+      );
+      setCardKeys(filteredKeys);
     } catch (err) {
       console.error('获取卡密列表失败:', err);
     } finally {
