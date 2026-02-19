@@ -1014,7 +1014,7 @@ html:not(.dark) .hover\:bg-slate-50:hover {
   0%, 100% {
     background-position: 0% 50%;
   }
- 50% {
+  50% {
     background-position: 100% 50%;
   }
 }
@@ -1041,15 +1041,113 @@ html:not(.dark) .hover\:bg-slate-50:hover {
 /* 弹跳动画 */
 @keyframes bounce-in {
   0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+ 50% {
+    transform: scale(1);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+ 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* 脉冲动画 */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+/* 脉冲发光 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* 加载旋转 */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+  50% {
+    transform: translateY(-20px) translateX(10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* 渐变背景动画 */
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes gradient-y {
+  0%, 100% {
+    background-position: 50% 0%;
+  }
+  50% {
+    background-position: 50% 100%;
+  }
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 15s ease infinite;
+}
+
+.animate-gradient-y {
+  background-size: 200% 200%;
+  animation: gradient-y 15s ease infinite;
+}
+
+/* 弹跳动画 */
+@keyframes bounce-in {
+  0% {
     transform: scale(0.5) opacity: 0;
   }
   50% {
     transform: scale(1);
   }
- 70% {
+  70% {
     transform: scale(0.9);
   }
-  100% {
+ 100% {
     transform: scale(1);
     opacity: 1;
   }
