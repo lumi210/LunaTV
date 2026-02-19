@@ -62,8 +62,16 @@ export async function GET(request: NextRequest) {
     const cardKeyInfo = await cardKeyService.getUserCardKey(username);
     console.log('cardKeyInfo:', JSON.stringify(cardKeyInfo, null, 2));
 
-    if (!cardKeyInfo) {
-      console.log('用户没有绑定卡密');
+    // 判断是否为推广模式下自动生成的卡密（推广模式注册时自动分配的卡密）
+    // 推广模式下自动生成的卡密 source 为 'promotion_register'
+    // 用户主动绑定的卡密 source 为 'redeem' 或 'admin_created'
+    const isAutoPromotionCardKey = cardKeyInfo?.source === 'promotion_register';
+
+    if (!cardKeyInfo || isAutoPromotionCardKey) {
+      console.log(
+        '用户没有绑定卡密（或只有推广模式自动生成的卡密）',
+        cardKeyInfo ? `source: ${cardKeyInfo.source}` : 'no cardkey',
+      );
       const noCardKeyInfo: WelcomeBannerInfo = {
         type: 'no_cardkey',
         message: '账户将于7日后到期',
@@ -77,13 +85,8 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const isPromotionUser = cardKeyInfo.source === 'promotion_register';
-    console.log(
-      'isPromotionUser:',
-      isPromotionUser,
-      'source:',
-      cardKeyInfo.source,
-    );
+    // 到达这里的用户都是主动绑定了卡密的用户（source 为 redeem 或 admin_created）
+    console.log('用户已绑定卡密，source:', cardKeyInfo.source);
 
     const now = Date.now();
     const daysRemaining = Math.ceil(
@@ -99,64 +102,31 @@ export async function GET(request: NextRequest) {
 
     let bannerInfo: WelcomeBannerInfo;
 
-    if (isPromotionUser) {
-      console.log('推广模式用户');
-      if (daysRemaining <= 0) {
-        console.log('卡密已过期');
-        bannerInfo = {
-          type: 'promotion_expiring',
-          message: '卡密已过期',
-          expirationDate: formattedDate,
-          daysRemaining: 0,
-          urgency: 'high',
-          actionText: '推荐好友注册',
-          actionUrl: '/settings',
-        };
-      } else {
-        console.log('推广用户');
-        bannerInfo = {
-          type: 'promotion_expiring',
-          message: `卡密到期日期: ${formattedDate}`,
-          expirationDate: formattedDate,
-          daysRemaining,
-          urgency:
-            daysRemaining <= 7
-              ? 'high'
-              : daysRemaining <= 30
-                ? 'medium'
-                : 'low',
-          actionText: '推荐好友注册',
-          actionUrl: '/settings',
-        };
-      }
+    if (daysRemaining <= 0) {
+      console.log('卡密已过期');
+      bannerInfo = {
+        type: 'normal_expiration',
+        message: '卡密已过期，请绑定新卡密',
+        urgency: 'high',
+      };
+    } else if (daysRemaining === 1) {
+      console.log('卡密今日到期');
+      bannerInfo = {
+        type: 'normal_expiration',
+        message: '卡密今日到期',
+        expirationDate: formattedDate,
+        daysRemaining,
+        urgency: 'high',
+      };
     } else {
-      console.log('普通用户');
-      if (daysRemaining <= 0) {
-        console.log('卡密已过期');
-        bannerInfo = {
-          type: 'normal_expiration',
-          message: '卡密已过期，请绑定新卡密',
-          urgency: 'high',
-        };
-      } else if (daysRemaining === 1) {
-        console.log('卡密今日到期');
-        bannerInfo = {
-          type: 'normal_expiration',
-          message: '卡密今日到期',
-          expirationDate: formattedDate,
-          daysRemaining,
-          urgency: 'high',
-        };
-      } else {
-        console.log('普通用户正常');
-        bannerInfo = {
-          type: 'normal_expiration',
-          message: `卡密到期日期: ${formattedDate}`,
-          expirationDate: formattedDate,
-          daysRemaining,
-          urgency: daysRemaining <= 30 ? 'medium' : 'low',
-        };
-      }
+      console.log('用户卡密正常');
+      bannerInfo = {
+        type: 'normal_expiration',
+        message: `卡密到期日期: ${formattedDate}`,
+        expirationDate: formattedDate,
+        daysRemaining,
+        urgency: daysRemaining <= 30 ? 'medium' : 'low',
+      };
     }
 
     console.log('返回欢迎栏信息:', JSON.stringify(bannerInfo, null, 2));
