@@ -140,6 +140,7 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
 
   // 创建卡密
   const handleCreateCardKeys = async () => {
+    console.log('handleCreateCardKeys called', { newKeyType, newKeyCount });
     setCreateLoading(true);
     try {
       const res = await fetch('/api/admin/cardkey', {
@@ -152,17 +153,22 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
         }),
       });
 
+      console.log('Response status:', res.status);
+
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        console.error('Error response:', data);
         throw new Error(data.error || `创建卡密失败: ${res.status}`);
       }
 
       const data = await res.json();
+      console.log('Success response:', data);
       setCreatedKeys(data.result.keys || []);
       setShowCreatedKeys(true);
       setShowCreateModal(false);
       await fetchCardKeys();
     } catch (err) {
+      console.error('Create card key error:', err);
       alert(err instanceof Error ? err.message : '创建卡密失败');
     } finally {
       setCreateLoading(false);
