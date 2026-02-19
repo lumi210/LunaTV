@@ -661,8 +661,8 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
 
       {/* 创建卡密弹窗 */}
       {showCreateModal && (
-        <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
-          <div className='bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[85vh] flex flex-col'>
+        <div className='fixed inset-0 bg-gray-50 dark:bg-gray-900 flex items-center justify-center z-50 p-4'>
+          <div className='bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[85vh] flex flex-col'>
             {/* 标题区域 */}
             <div className='mb-6 shrink-0'>
               <h3 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
