@@ -200,13 +200,28 @@ export class CardKeyService {
     } else {
       // 创建新的用户卡密记录
       const userCardKeyId = this.generateUUID();
+      const cardKeySource = validation.cardKey!.source;
+      // 将 CardKeySource 转换为 UserCardKey.source 允许的类型
+      const userCardKeySource:
+        | 'invitation'
+        | 'redeem'
+        | 'manual'
+        | 'promotion_register' =
+        cardKeySource === 'admin_created' || cardKeySource === 'points_redeem'
+          ? 'manual'
+          : (cardKeySource as
+              | 'invitation'
+              | 'redeem'
+              | 'manual'
+              | 'promotion_register') || 'redeem';
+
       const userCardKey: import('./types').UserCardKey = {
         id: userCardKeyId,
         keyHash: hashedKey,
         username: username,
         type: validation.cardKey!.keyType,
         status: 'used',
-        source: validation.cardKey!.source || 'redeem',
+        source: userCardKeySource,
         createdAt: Date.now(),
         expiresAt: newExpiresAt,
       };
