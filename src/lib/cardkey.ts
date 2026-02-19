@@ -343,9 +343,12 @@ export class CardKeyService {
     const ownerUser = process.env.USERNAME;
     const role = username === ownerUser ? 'owner' : 'user';
 
-    // 检查用户是否存在
-    const exists = await db.checkUserExist(username);
-    if (!exists) {
+    // 检查用户是否存在（使用 V2 版本，检查新版本的用户存储位置）
+    const existsV2 = await db.checkUserExistV2(username);
+    // 也检查旧版本（兼容性）
+    const existsV1 = await db.checkUserExist(username);
+
+    if (!existsV2 && !existsV1) {
       // 创建用户（空密码，用户需要通过其他方式设置密码）
       await db.registerUser(username, '');
       console.log(`[CardKeyService] 自动创建用户: ${username}, 角色: ${role}`);
