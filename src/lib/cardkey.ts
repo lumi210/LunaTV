@@ -206,7 +206,7 @@ export class CardKeyService {
         username: username,
         type: validation.cardKey!.keyType,
         status: 'used',
-        source: 'redeem',
+        source: validation.cardKey!.source || 'redeem',
         createdAt: Date.now(),
         expiresAt: newExpiresAt,
       };

@@ -62,22 +62,13 @@ export async function GET(request: NextRequest) {
     const cardKeyInfo = await cardKeyService.getUserCardKey(username);
     console.log('cardKeyInfo:', JSON.stringify(cardKeyInfo, null, 2));
 
-    // 判断是否为推广模式下自动生成的卡密（推广模式注册时自动分配的卡密）
-    // 推广模式下自动生成的卡密 source 为 'promotion_register'
-    // 用户主动绑定的卡密 source 为 'redeem' 或 'admin_created'
-    const isAutoPromotionCardKey = cardKeyInfo?.source === 'promotion_register';
-
-    if (!cardKeyInfo || isAutoPromotionCardKey) {
-      console.log(
-        '用户没有绑定卡密（或只有推广模式自动生成的卡密）',
-        cardKeyInfo ? `source: ${cardKeyInfo.source}` : 'no cardkey',
-      );
+    if (!cardKeyInfo) {
+      console.log('用户没有绑定卡密');
       const noCardKeyInfo: WelcomeBannerInfo = {
         type: 'no_cardkey',
-        message: '账户将于7日后到期',
-        daysRemaining: 7,
-        urgency: 'medium',
-        actionText: '推荐好友注册',
+        message: '账户未绑定卡密',
+        urgency: 'high',
+        actionText: '绑定卡密',
         actionUrl: '/settings',
       };
       return NextResponse.json(noCardKeyInfo, {
@@ -85,7 +76,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 到达这里的用户都是主动绑定了卡密的用户（source 为 redeem 或 admin_created）
+    // 用户已绑定卡密（包括推广模式自动生成的卡密）
     console.log('用户已绑定卡密，source:', cardKeyInfo.source);
 
     const now = Date.now();
