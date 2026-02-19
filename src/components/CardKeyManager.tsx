@@ -661,101 +661,194 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
 
       {/* 创建卡密弹窗 */}
       {showCreateModal && (
-        <div className='fixed inset-0 bg-gray-50 dark:bg-gray-900 flex items-center justify-center z-50 p-4'>
-          <div className='bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[85vh] flex flex-col'>
+        <div className='fixed inset-0 flex items-center justify-center z-50 p-4'>
+          {/* 动态背景 */}
+          <div className='absolute inset-0 bg-gradient-to-br from-indigo-900/95 via-purple-900/90 to-pink-900/95 animate-gradient-x' />
+          <div
+            className='absolute inset-0 bg-gradient-to-tr from-blue-900/80 via-cyan-900/80 to-teal-900/80 animate-gradient-y'
+            style={{
+              animationDuration: '3s',
+              animationIterationCount: 'infinite',
+            }}
+          />
+
+          {/* 浮动粒子效果 */}
+          <div className='absolute inset-0 overflow-hidden pointer-events-none'>
+            <div
+              className='absolute top-1/4 left-1/4 w-2 h-2 bg-white/10 rounded-full animate-float'
+              style={{ animationDelay: '0s' }}
+            />
+            <div
+              className='absolute top-1/2 right-1/4 w-3 h-3 bg-white/10 rounded-full animate-float'
+              style={{ animationDelay: '1s' }}
+            />
+            <div
+              className='absolute bottom-1/3 left-1/3 w-2 h-2 bg-white/10 rounded-full animate-float'
+              style={{ animationDelay: '2s' }}
+            />
+            <div
+              className='absolute top-1/3 right-1/3 w-2.5 h-2.5 bg-white/10 rounded-full animate-float'
+              style={{ animationDelay: '1.5s' }}
+            />
+          </div>
+
+          {/* 弹窗容器 - 玻璃态效果 */}
+          <div className='relative w-full max-w-2xl max-h-[85vh] flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/50 p-8'>
+            {/* 光晕效果 */}
+            <div className='absolute -inset-4 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl animate-pulse-slow' />
+
             {/* 标题区域 */}
-            <div className='mb-6 shrink-0'>
-              <h3 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
-                创建卡密
-              </h3>
-              <p className='text-sm text-gray-600 dark:text-gray-400'>
-                选择类型和数量创建新的卡密
-              </p>
+            <div className='relative mb-8'>
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center gap-4'>
+                  {/* 3D 图标 */}
+                  <div className='relative w-14 h-14'>
+                    <div className='absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg animate-bounce-in' />
+                    <div
+                      className='absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-lg animate-bounce-in'
+                      style={{ animationDelay: '0.1s' }}
+                    />
+                    <div className='absolute inset-0 flex items-center justify-center'>
+                      <KeyRound className='w-8 h-8 text-white drop-shadow-lg' />
+                    </div>
+                  </div>
+                  <div>
+                    <h2 className='text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent'>
+                      创建卡密
+                    </h2>
+                    <p className='text-sm text-gray-600 dark:text-gray-400 mt-1'>
+                      为用户生成观影时长卡密
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type='button'
+                  onClick={() => setShowCreateModal(false)}
+                  className='group relative p-2.5 hover:bg-white/50 dark:hover:bg-gray-800 rounded-2xl transition-all duration-300'
+                >
+                  <X className='w-6 h-6 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors' />
+                </button>
+              </div>
             </div>
 
-            <div className='space-y-4 flex-1 overflow-y-auto'>
-              {/* 卡密类型选择 */}
-              <div>
-                <label className='block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2'>
-                  卡密类型
-                </label>
-                <select
-                  value={newKeyType}
-                  onChange={(e) => setNewKeyType(e.target.value as any)}
-                  className='w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 dark:text-white'
+            {/* 卡密类型选择 - 玻璃态卡片 */}
+            <div className='grid grid-cols-2 gap-4 mb-8'>
+              {[
+                { type: 'year', label: '1年', desc: '365天', icon: '📅' },
+                { type: 'quarter', label: '1季', desc: '90天', icon: '📆' },
+                { type: 'month', label: '1月', desc: '30天', icon: '🗓️' },
+                { type: 'week', label: '1周', desc: '7天', icon: '⏰' },
+              ].map((item) => (
+                <button
+                  key={item.type}
+                  type='button'
+                  onClick={() => setNewKeyType(item.type as any)}
+                  className={`group relative p-6 rounded-2xl transition-all duration-300 ${
+                    newKeyType === item.type
+                      ? 'bg-gradient-to-br from-indigo-500 to-purple-600 shadow-xl shadow-indigo-500/50 scale-105'
+                      : 'bg-white/50 dark:bg-gray-800/50 hover:bg-white/80 dark:hover:bg-gray-700/80 hover:scale-102'
+                  }`}
                 >
-                  <option value='year'>1年（365天）</option>
-                  <option value='quarter'>1季（90天）</option>
-                  <option value='month'>1月（30天）</option>
-                  <option value='week'>1周（7天）</option>
-                </select>
-              </div>
+                  {/* 光晕效果 */}
+                  {newKeyType === item.type && (
+                    <div className='absolute inset-0 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-2xl opacity-20 animate-pulse' />
+                  )}
 
-              {/* 生成数量 */}
-              <div>
-                <label className='block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2'>
-                  生成数量
-                </label>
-                <div className='flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-xl p-2'>
-                  <button
-                    type='button'
-                    onClick={() => setNewKeyCount(Math.max(1, newKeyCount - 1))}
-                    disabled={newKeyCount <= 1}
-                    className='w-10 h-10 flex items-center justify-center rounded-lg bg-orange-500 text-white font-bold hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed'
-                  >
-                    -
-                  </button>
+                  <div className='text-4xl mb-2'>{item.icon}</div>
+                  <div className='text-lg font-bold text-gray-800 dark:text-gray-200 mb-1'>
+                    {item.label}
+                  </div>
+                  <div className='text-sm text-gray-600 dark:text-gray-400'>
+                    {item.desc}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* 数量选择 */}
+            <div className='mb-8'>
+              <label className='block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3'>
+                生成数量
+              </label>
+              <div className='flex items-center gap-4'>
+                <button
+                  type='button'
+                  onClick={() => setNewKeyCount(Math.max(1, newKeyCount - 1))}
+                  className='w-12 h-12 rounded-full bg-white/80 dark:bg-gray-700 hover:bg-white dark:hover:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-400 text-xl font-bold transition-all duration-300 hover:scale-110'
+                >
+                  -
+                </button>
+                <div className='flex-1 text-center'>
                   <input
                     type='number'
                     min='1'
                     max='100'
                     value={newKeyCount}
                     onChange={(e) =>
-                      setNewKeyCount(
-                        Math.max(
-                          1,
-                          Math.min(100, parseInt(e.target.value) || 1),
-                        ),
-                      )
+                      setNewKeyCount(Math.max(1, parseInt(e.target.value) || 1))
                     }
-                    className='flex-1 text-center text-xl font-bold bg-transparent border-0 focus:outline-none text-gray-900 dark:text-white'
+                    className='w-24 text-center text-2xl font-bold bg-white/80 dark:bg-gray-700 rounded-2xl py-3 border-2 border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 text-gray-800 dark:text-gray-200'
                   />
-                  <button
-                    type='button'
-                    onClick={() =>
-                      setNewKeyCount(Math.min(100, newKeyCount + 1))
-                    }
-                    disabled={newKeyCount >= 100}
-                    className='w-10 h-10 flex items-center justify-center rounded-lg bg-orange-500 text-white font-bold hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed'
-                  >
-                    +
-                  </button>
                 </div>
-                <div className='mt-1 text-xs text-gray-500 dark:text-gray-400 text-center'>
-                  每次最多生成 100 个卡密
-                </div>
+                <button
+                  type='button'
+                  onClick={() => setNewKeyCount(Math.min(100, newKeyCount + 1))}
+                  className='w-12 h-12 rounded-full bg-white/80 dark:bg-gray-700 hover:bg-white dark:hover:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-400 text-xl font-bold transition-all duration-300 hover:scale-110'
+                >
+                  +
+                </button>
               </div>
             </div>
 
-            {/* 操作按钮 */}
-            <div className='pt-4 mt-4 border-t border-gray-200 dark:border-gray-700 shrink-0'>
-              <div className='flex justify-end gap-2'>
-                <button
-                  type='button'
-                  onClick={() => setShowCreateModal(false)}
-                  className='px-6 py-2.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors'
-                >
-                  取消
-                </button>
-                <button
-                  type='button'
-                  onClick={handleCreateCardKeys}
-                  disabled={createLoading}
-                  className='px-8 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-                >
-                  {createLoading ? '创建中...' : '创建'}
-                </button>
+            {/* 统计信息 */}
+            <div className='mb-6 p-4 rounded-2xl bg-gradient-to-r from-indigo-50/50 to-purple-50/50 dark:from-indigo-900/30 dark:to-purple-900/30 border border-indigo-200/30 dark:border-indigo-800/30'>
+              <div className='flex items-center justify-between text-sm'>
+                <span className='font-medium text-gray-700 dark:text-gray-300'>
+                  预计生成数量
+                </span>
+                <span className='font-bold text-indigo-600 dark:text-indigo-400'>
+                  {newKeyCount} 个
+                </span>
               </div>
+              <div className='flex items-center justify-between text-sm mt-2'>
+                <span className='font-medium text-gray-700 dark:text-gray-300'>
+                  总时长
+                </span>
+                <span className='font-bold text-purple-600 dark:text-purple-400'>
+                  {CARD_KEY_TYPE_LABELS[newKeyType]} × {newKeyCount}
+                </span>
+              </div>
+            </div>
+
+            {/* 按钮区域 */}
+            <div className='flex gap-4 mt-auto pt-6 border-t border-gray-200 dark:border-gray-700'>
+              <button
+                type='button'
+                onClick={() => setShowCreateModal(false)}
+                className='flex-1 px-6 py-3.5 text-gray-700 dark:text-gray-300 font-bold bg-white dark:bg-gray-800 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-105'
+              >
+                取消
+              </button>
+              <button
+                type='button'
+                onClick={handleCreateCardKeys}
+                disabled={createLoading}
+                className={`flex-2 px-8 py-3.5 text-white font-bold bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 rounded-2xl transition-all duration-300 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/50 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+                  createLoading ? 'animate-pulse' : ''
+                }`}
+              >
+                {createLoading ? (
+                  <div className='flex items-center gap-2'>
+                    <div className='w-5 h-5 border-2 border-white/30 border-t-transparent animate-spin rounded-full' />
+                    <span>创建中...</span>
+                  </div>
+                ) : (
+                  <div className='flex items-center gap-2'>
+                    <Settings className='w-5 h-5' />
+                    <span>生成卡密</span>
+                  </div>
+                )}
+              </button>
             </div>
           </div>
         </div>
