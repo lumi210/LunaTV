@@ -763,18 +763,18 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
 
       {/* 精美已创建卡密显示弹窗 */}
       {showCreatedKeys && (
-        <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
-          <div className='relative bg-white/98 dark:bg-gray-900/98 backdrop-blur-3xl rounded-3xl p-8 max-w-3xl w-full max-h-[85vh] overflow-hidden shadow-2xl shadow-orange-500/20 border border-orange-200/30 dark:border-orange-800/30 animate-scale-in flex flex-col'>
+        <div className='fixed inset-0 bg-gradient-to-br from-gray-900/95 via-orange-900/90 to-amber-900/95 backdrop-blur-md flex items-center justify-center z-50 p-4'>
+          <div className='relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-3xl shadow-2xl p-8 max-w-3xl w-full max-h-[90vh] flex flex-col border border-white/20 dark:border-gray-700/30'>
             {/* 装饰性光晕 */}
-            <div className='absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 rounded-full blur-3xl opacity-20' />
-            <div className='absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-br from-yellow-400 via-orange-400 to-amber-400 rounded-full blur-3xl opacity-20' />
+            <div className='absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 rounded-full blur-3xl opacity-30' />
+            <div className='absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-br from-yellow-400 via-orange-400 to-amber-400 rounded-full blur-3xl opacity-30' />
 
             {/* 标题区域 */}
-            <div className='relative flex justify-between items-start mb-6'>
+            <div className='relative flex justify-between items-start mb-6 flex-shrink-0'>
               <div className='flex items-center gap-4'>
                 <div className='relative'>
-                  <div className='absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl blur-xl opacity-30 animate-pulse-soft' />
-                  <div className='relative p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-lg shadow-emerald-500/30'>
+                  <div className='absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl blur-xl opacity-40 animate-pulse-soft' />
+                  <div className='relative p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-lg shadow-emerald-500/40'>
                     <CheckCircle className='w-6 h-6 text-white' />
                   </div>
                 </div>
@@ -797,7 +797,7 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
             </div>
 
             {/* 提示信息 */}
-            <div className='relative mb-6 p-4 bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 dark:from-orange-950/20 dark:via-amber-950/20 dark:to-yellow-950/20 rounded-xl border border-orange-200/30 dark:border-orange-800/30'>
+            <div className='relative mb-6 p-4 bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 dark:from-orange-950/20 dark:via-amber-950/20 dark:to-yellow-950/20 rounded-xl border border-orange-200/30 dark:border-orange-800/30 flex-shrink-0'>
               <div className='flex items-start gap-3'>
                 <div className='flex-shrink-0 text-2xl'>💡</div>
                 <p className='text-sm text-gray-700 dark:text-gray-300 leading-relaxed'>
@@ -807,11 +807,11 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
             </div>
 
             {/* 复制全部按钮 */}
-            <div className='relative mb-6'>
+            <div className='relative mb-6 flex-shrink-0'>
               <button
                 type='button'
                 onClick={copyAllCardKeys}
-                className='inline-flex items-center justify-center w-full px-6 py-3.5 text-white bg-gradient-to-br from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-xl transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 active:scale-95'
+                className='inline-flex items-center justify-center w-full px-6 py-4 text-white bg-gradient-to-br from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-xl transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 active:scale-95'
               >
                 <Copy className='w-5 h-5 mr-3' />
                 <span className='font-semibold'>
@@ -820,25 +820,25 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
               </button>
             </div>
 
-            {/* 卡密列表 */}
-            <div className='relative flex-1 overflow-y-auto space-y-3 pr-2'>
+            {/* 卡密列表 - 使用 overflow-y-auto 确保内容可滚动 */}
+            <div className='relative flex-1 overflow-y-auto space-y-3 pr-2 min-h-0 max-h-[50vh]'>
               {createdKeys.map((key, index) => (
                 <div
                   key={index}
                   className='group relative flex items-center justify-between p-4 bg-gradient-to-r from-orange-50/50 via-amber-50/50 to-yellow-50/50 dark:from-orange-950/10 dark:via-amber-950/10 dark:to-yellow-950/10 rounded-2xl border border-orange-200/30 dark:border-orange-800/30 transition-all duration-300 hover:from-orange-100/70 hover:via-amber-100/70 hover:to-yellow-100/70 dark:hover:from-orange-950/20 dark:hover:via-amber-950/20 dark:hover:to-yellow-950/20 hover:shadow-lg hover:shadow-orange-500/15 hover:-translate-x-1'
                 >
                   <div className='flex items-center gap-3 flex-1 min-w-0 mr-4'>
-                    <div className='flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg text-white text-xs font-bold shadow-md shadow-orange-500/30'>
+                    <div className='flex-shrink-0 w-10 h-10 flex items-center justify-center bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl text-white text-sm font-bold shadow-md shadow-orange-500/30'>
                       {index + 1}
                     </div>
-                    <code className='font-mono text-sm text-gray-700 dark:text-gray-300 flex-1 min-w-0 break-all bg-white/50 dark:bg-gray-800/50 px-3 py-2 rounded-lg border border-orange-200/20 dark:border-orange-800/20'>
+                    <code className='font-mono text-sm text-gray-700 dark:text-gray-300 flex-1 min-w-0 break-all bg-white/50 dark:bg-gray-800/50 px-4 py-2.5 rounded-xl border border-orange-200/20 dark:border-orange-800/20'>
                       {key}
                     </code>
                   </div>
                   <button
                     type='button'
                     onClick={() => copyCardKey(key)}
-                    className='inline-flex items-center px-4 py-2 text-white bg-gradient-to-br from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-xl transition-all duration-300 shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 hover:scale-105 active:scale-95'
+                    className='inline-flex items-center px-4 py-2.5 text-white bg-gradient-to-br from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-xl transition-all duration-300 shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 hover:scale-105 active:scale-95'
                   >
                     <Copy className='w-4 h-4 mr-2' />
                     <span className='font-medium text-sm'>复制</span>
@@ -848,11 +848,11 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
             </div>
 
             {/* 底部关闭按钮 */}
-            <div className='relative mt-6 pt-6 border-t border-orange-200/30 dark:border-orange-800/30'>
+            <div className='relative mt-6 pt-6 border-t border-orange-200/30 dark:border-orange-800/30 flex-shrink-0'>
               <button
                 type='button'
                 onClick={() => setShowCreatedKeys(false)}
-                className='inline-flex items-center justify-center w-full px-6 py-3.5 text-white bg-gradient-to-br from-gray-500 to-slate-500 hover:from-gray-600 hover:to-slate-600 rounded-xl transition-all duration-300 shadow-lg shadow-gray-500/30 hover:shadow-xl hover:shadow-gray-500/40 hover:-translate-y-0.5 active:scale-95'
+                className='inline-flex items-center justify-center w-full px-6 py-4 text-white bg-gradient-to-br from-gray-500 to-slate-500 hover:from-gray-600 hover:to-slate-600 rounded-xl transition-all duration-300 shadow-lg shadow-gray-500/30 hover:shadow-xl hover:shadow-gray-500/40 hover:-translate-y-0.5 active:scale-95'
               >
                 <span className='font-semibold'>关闭</span>
               </button>
