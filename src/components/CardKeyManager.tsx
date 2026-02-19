@@ -55,6 +55,13 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
   const [createdKeys, setCreatedKeys] = useState<string[]>([]);
   const [showCreatedKeys, setShowCreatedKeys] = useState(false);
 
+  // 当显示已创建卡密弹窗时，滚动到页面顶部
+  useEffect(() => {
+    if (showCreatedKeys) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [showCreatedKeys]);
+
   // 系统模式相关状态
   const [systemMode, setSystemMode] = useState<'promotion' | 'operation'>(
     'operation',
