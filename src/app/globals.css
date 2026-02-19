@@ -1043,8 +1043,11 @@ html:not(.dark) .hover\:bg-slate-50:hover {
   0% {
     transform: scale(0.5) opacity: 0;
   }
-  50% {
+  100% {
     transform: scale(1.1);
+  }
+  50% {
+    transform: scale(1);
   }
   70% {
     transform: scale(0.9);
