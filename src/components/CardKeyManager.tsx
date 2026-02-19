@@ -855,72 +855,101 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
         </div>
       )}
 
-      {/* 精美已创建卡密显示弹窗 - 简洁版 */}
+      {/* 精美已创建卡密显示弹窗 */}
       {showCreatedKeys && (
-        <div className='fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-8 overflow-y-auto'>
-          <div className='relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col border border-gray-200 dark:border-gray-700 animate-bounce-in'>
-            {/* 顶部操作栏 - 固定 */}
-            <div className='sticky top-0 z-10 bg-white dark:bg-gray-800 rounded-t-2xl border-b border-gray-200 dark:border-gray-700 p-4'>
-              <div className='flex items-center justify-between gap-4'>
-                <div className='flex items-center gap-3'>
-                  <div className='p-2 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg'>
-                    <CheckCircle className='w-5 h-5 text-white' />
-                  </div>
-                  <div>
-                    <h3 className='text-lg font-bold text-gray-900 dark:text-gray-100'>
-                      已生成 {createdKeys.length} 个卡密
-                    </h3>
-                    <p className='text-xs text-gray-500 dark:text-gray-400'>
-                      点击卡密可单独复制
-                    </p>
+        <div className='fixed inset-0 bg-gray-50 dark:bg-gray-900 flex items-center justify-center z-50 p-4'>
+          <div className='relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 max-w-3xl w-full max-h-[90vh] flex flex-col border border-gray-200 dark:border-gray-700'>
+            {/* 装饰性光晕 */}
+            <div className='absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 rounded-full blur-3xl opacity-30' />
+            <div className='absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-br from-yellow-400 via-orange-400 to-amber-400 rounded-full blur-3xl opacity-30' />
+
+            {/* 标题区域 */}
+            <div className='relative flex justify-between items-start mb-6 flex-shrink-0'>
+              <div className='flex items-center gap-4'>
+                <div className='relative'>
+                  <div className='absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl blur-xl opacity-40 animate-pulse-soft' />
+                  <div className='relative p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-lg shadow-emerald-500/40'>
+                    <CheckCircle className='w-6 h-6 text-white' />
                   </div>
                 </div>
-                <div className='flex items-center gap-2'>
-                  <button
-                    type='button'
-                    onClick={copyAllCardKeys}
-                    className='inline-flex items-center px-4 py-2 text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-lg transition-all text-sm font-medium shadow-md'
-                  >
-                    <Copy className='w-4 h-4 mr-2' />
-                    一键复制全部
-                  </button>
-                  <button
-                    type='button'
-                    onClick={() => setShowCreatedKeys(false)}
-                    className='p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors'
-                  >
-                    <X className='w-5 h-5 text-gray-500' />
-                  </button>
+                <div>
+                  <h3 className='text-2xl font-bold bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 dark:from-emerald-400 dark:via-green-400 dark:to-teal-400 bg-clip-text text-transparent'>
+                    已创建 {createdKeys.length} 个卡密
+                  </h3>
+                  <p className='text-sm text-gray-600 dark:text-gray-400 mt-1'>
+                    卡密已保存到数据库
+                  </p>
                 </div>
+              </div>
+              <button
+                type='button'
+                onClick={() => setShowCreatedKeys(false)}
+                className='inline-flex items-center p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all duration-300'
+              >
+                <X className='w-5 h-5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors' />
+              </button>
+            </div>
+
+            {/* 提示信息 */}
+            <div className='relative mb-6 p-4 bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 dark:from-orange-950/20 dark:via-amber-950/20 dark:to-yellow-950/20 rounded-xl border border-orange-200/30 dark:border-orange-800/30 flex-shrink-0'>
+              <div className='flex items-start gap-3'>
+                <div className='flex-shrink-0 text-2xl'>💡</div>
+                <p className='text-sm text-gray-700 dark:text-gray-300 leading-relaxed'>
+                  这些卡密已保存到数据库，您可以随时在卡密列表中查看和复制。建议立即复制并妥善保管。
+                </p>
               </div>
             </div>
 
-            {/* 卡密列表 - 紧凑网格 */}
-            <div className='p-4 max-h-[60vh] overflow-y-auto'>
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
-                {createdKeys.map((key, index) => (
-                  <div
-                    key={index}
-                    onClick={() => copyCardKey(key)}
-                    className='group flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg cursor-pointer transition-all border border-transparent hover:border-blue-200 dark:hover:border-blue-800'
-                  >
-                    <span className='flex-shrink-0 w-6 h-6 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded text-xs font-medium text-gray-600 dark:text-gray-400'>
+            {/* 复制全部按钮 */}
+            <div className='relative mb-6 flex-shrink-0'>
+              <button
+                type='button'
+                onClick={copyAllCardKeys}
+                className='inline-flex items-center justify-center w-full px-6 py-4 text-white bg-gradient-to-br from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-xl transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 active:scale-95'
+              >
+                <Copy className='w-5 h-5 mr-3' />
+                <span className='font-semibold'>
+                  复制全部卡密 ({createdKeys.length} 个)
+                </span>
+              </button>
+            </div>
+
+            {/* 卡密列表 - 使用 overflow-y-auto 确保内容可滚动 */}
+            <div className='relative flex-1 overflow-y-auto space-y-3 pr-2 min-h-0 max-h-[50vh]'>
+              {createdKeys.map((key, index) => (
+                <div
+                  key={index}
+                  className='group relative flex items-center justify-between p-4 bg-gradient-to-r from-orange-50/50 via-amber-50/50 to-yellow-50/50 dark:from-orange-950/10 dark:via-amber-950/10 dark:to-yellow-950/10 rounded-2xl border border-orange-200/30 dark:border-orange-800/30 transition-all duration-300 hover:from-orange-100/70 hover:via-amber-100/70 hover:to-yellow-100/70 dark:hover:from-orange-950/20 dark:hover:via-amber-950/20 dark:hover:to-yellow-950/20 hover:shadow-lg hover:shadow-orange-500/15 hover:-translate-x-1'
+                >
+                  <div className='flex items-center gap-3 flex-1 min-w-0 mr-4'>
+                    <div className='flex-shrink-0 w-10 h-10 flex items-center justify-center bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl text-white text-sm font-bold shadow-md shadow-orange-500/30'>
                       {index + 1}
-                    </span>
-                    <code className='flex-1 text-sm font-mono text-gray-700 dark:text-gray-300 truncate'>
+                    </div>
+                    <code className='font-mono text-sm text-gray-700 dark:text-gray-300 flex-1 min-w-0 break-all bg-white/50 dark:bg-gray-800/50 px-4 py-2.5 rounded-xl border border-orange-200/20 dark:border-orange-800/20'>
                       {key}
                     </code>
-                    <Copy className='w-4 h-4 text-gray-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0' />
                   </div>
-                ))}
-              </div>
+                  <button
+                    type='button'
+                    onClick={() => copyCardKey(key)}
+                    className='inline-flex items-center px-4 py-2.5 text-white bg-gradient-to-br from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-xl transition-all duration-300 shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 hover:scale-105 active:scale-95'
+                  >
+                    <Copy className='w-4 h-4 mr-2' />
+                    <span className='font-medium text-sm'>复制</span>
+                  </button>
+                </div>
+              ))}
             </div>
 
-            {/* 底部 */}
-            <div className='p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 rounded-b-2xl'>
-              <p className='text-xs text-gray-500 dark:text-gray-400 text-center'>
-                卡密已保存至数据库，可随时在列表中查看
-              </p>
+            {/* 底部关闭按钮 */}
+            <div className='relative mt-6 pt-6 border-t border-orange-200/30 dark:border-orange-800/30 flex-shrink-0'>
+              <button
+                type='button'
+                onClick={() => setShowCreatedKeys(false)}
+                className='inline-flex items-center justify-center w-full px-6 py-4 text-white bg-gradient-to-br from-gray-500 to-slate-500 hover:from-gray-600 hover:to-slate-600 rounded-xl transition-all duration-300 shadow-lg shadow-gray-500/30 hover:shadow-xl hover:shadow-gray-500/40 hover:-translate-y-0.5 active:scale-95'
+              >
+                <span className='font-semibold'>关闭</span>
+              </button>
             </div>
           </div>
         </div>
