@@ -78,6 +78,27 @@ export async function GET(request: NextRequest) {
 
     // 用户已绑定卡密（包括推广模式自动生成的卡密）
     console.log('用户已绑定卡密，source:', cardKeyInfo.source);
+    console.log('cardKeyInfo.expiresAt:', cardKeyInfo.expiresAt);
+    console.log('cardKeyInfo.expiresAt type:', typeof cardKeyInfo.expiresAt);
+
+    // 检查 expiresAt 是否有效
+    if (
+      !cardKeyInfo.expiresAt ||
+      typeof cardKeyInfo.expiresAt !== 'number' ||
+      isNaN(cardKeyInfo.expiresAt)
+    ) {
+      console.error('卡密信息中 expiresAt 无效:', cardKeyInfo.expiresAt);
+      const errorInfo: WelcomeBannerInfo = {
+        type: 'no_cardkey',
+        message: '卡密信息异常，请联系管理员',
+        urgency: 'high',
+        actionText: '绑定卡密',
+        actionUrl: '/settings',
+      };
+      return NextResponse.json(errorInfo, {
+        headers: { 'Cache-Control': 'no-store' },
+      });
+    }
 
     const now = Date.now();
     const daysRemaining = Math.ceil(
@@ -85,11 +106,15 @@ export async function GET(request: NextRequest) {
     );
 
     const expirationDate = new Date(cardKeyInfo.expiresAt);
+    console.log('expirationDate:', expirationDate);
+    console.log('expirationDate is valid:', !isNaN(expirationDate.getTime()));
+
     const formattedDate = expirationDate.toLocaleDateString('zh-CN', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
     });
+    console.log('formattedDate:', formattedDate);
 
     let bannerInfo: WelcomeBannerInfo;
 

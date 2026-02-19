@@ -188,6 +188,7 @@ function HomeClient() {
 
         if (bannerResponse.ok) {
           const bannerData = await bannerResponse.json();
+          console.log('欢迎栏数据:', JSON.stringify(bannerData, null, 2));
           setWelcomeBannerInfo(bannerData);
         }
       } catch (error) {
