@@ -763,8 +763,8 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
 
       {/* 精美已创建卡密显示弹窗 */}
       {showCreatedKeys && (
-        <div className='fixed inset-0 bg-gradient-to-br from-gray-900/95 via-orange-900/90 to-amber-900/95 backdrop-blur-md flex items-center justify-center z-50 p-4'>
-          <div className='relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-3xl shadow-2xl p-8 max-w-3xl w-full max-h-[90vh] flex flex-col border border-white/20 dark:border-gray-700/30'>
+        <div className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
+          <div className='relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 max-w-3xl w-full max-h-[90vh] flex flex-col border border-white/20 dark:border-gray-700/30'>
             {/* 装饰性光晕 */}
             <div className='absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 rounded-full blur-3xl opacity-30' />
             <div className='absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-br from-yellow-400 via-orange-400 to-amber-400 rounded-full blur-3xl opacity-30' />
