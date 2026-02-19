@@ -1585,6 +1585,14 @@ export abstract class BaseRedisStorage implements IStorage {
   async getAllCardKeys(): Promise<CardKey[]> {
     const pattern = `cardkey:hash:*`;
     const keys = await this.scanKeys(pattern);
+    console.log('getAllCardKeys - 找到的 keys:', keys.length);
+
+    if (keys.length > 0 && keys.length <= 10) {
+      console.log('getAllCardKeys - 所有 keys:', keys);
+    } else if (keys.length > 10) {
+      console.log('getAllCardKeys - 前10个 keys:', keys.slice(0, 10));
+    }
+
     if (keys.length === 0) return [];
 
     const values = await this.withRetry(() => this.client.mGet(keys));
@@ -1594,6 +1602,21 @@ export abstract class BaseRedisStorage implements IStorage {
         result.push(JSON.parse(val) as CardKey);
       }
     });
+
+    console.log('getAllCardKeys - 返回的卡密数量:', result.length);
+
+    if (result.length > 0) {
+      console.log(
+        'getAllCardKeys - 前3个卡密:',
+        result.slice(0, 3).map((ck) => ({
+          keyHash: ck.keyHash.substring(0, 16) + '...',
+          status: ck.status,
+          keyType: ck.keyType,
+          source: ck.source,
+        })),
+      );
+    }
+
     return result;
   }
 
@@ -1741,28 +1764,22 @@ export abstract class BaseRedisStorage implements IStorage {
     if (userCardKeyInfo) {
       console.log('userCardKeyInfo:', JSON.stringify(userCardKeyInfo, null, 2));
 
-      // 获取卡密详细信息
-      const allCardKeys = await this.getAllCardKeys();
+      // 直接根据 keyHash 获取卡密,避免扫描所有卡密
       console.log(
-        'getFullUserCardKey - allCardKeys count:',
-        allCardKeys.length,
-      );
-
-      if (allCardKeys.length > 0) {
-        console.log(
-          'getFullUserCardKey - 前几个卡密的 keyHash:',
-          allCardKeys.slice(0, 3).map((ck) => ck.keyHash),
-        );
-      }
-
-      const cardKey = allCardKeys.find(
-        (ck) => ck.keyHash === userCardKeyInfo.boundKey,
-      );
-      console.log(
-        'getFullUserCardKey - 查找 boundKey:',
+        'getFullUserCardKey - 根据 keyHash 获取卡密:',
         userCardKeyInfo.boundKey,
       );
-      console.log('getFullUserCardKey - found cardKey:', cardKey);
+      const cardKey = await this.getCardKey(userCardKeyInfo.boundKey);
+      console.log(
+        'getFullUserCardKey - found cardKey:',
+        cardKey
+          ? {
+              keyHash: cardKey.keyHash.substring(0, 16) + '...',
+              status: cardKey.status,
+              keyType: cardKey.keyType,
+            }
+          : null,
+      );
 
       // 使用 userCardKeyInfo.expiresAt 计算剩余天数(这是延期后的实际过期时间)
       const now = Date.now();
@@ -1818,9 +1835,17 @@ export abstract class BaseRedisStorage implements IStorage {
 
     console.log('找到卡密:', targetKey);
 
-    // 获取卡密明文
-    const allCardKeys = await this.getAllCardKeys();
-    const cardKey = allCardKeys.find((ck) => ck.keyHash === targetKey.keyHash);
+    // 直接根据 keyHash 获取卡密明文
+    const cardKey = await this.getCardKey(targetKey.keyHash);
+    console.log(
+      'getCardKey 返回:',
+      cardKey
+        ? {
+            keyHash: cardKey.keyHash.substring(0, 16) + '...',
+            status: cardKey.status,
+          }
+        : null,
+    );
 
     const daysRemaining = Math.max(
       0,

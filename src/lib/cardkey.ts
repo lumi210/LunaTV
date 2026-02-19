@@ -57,14 +57,42 @@ export class CardKeyService {
 
   // 验证卡密有效性
   async validateCardKey(cardKey: string): Promise<CardKeyValidationResult> {
+    console.log('=== validateCardKey 开始 ===');
+    console.log('输入卡密:', cardKey);
+
     const hashedKey = await this.hashCardKey(cardKey);
+    console.log('计算出的 keyHash:', hashedKey);
 
     // 由于我们现在使用 keyHash 作为查找键，需要查找所有卡密
     // 先获取所有卡密，然后匹配 keyHash
     const allCardKeys = await db.getAllCardKeys();
+    console.log('所有卡密数量:', allCardKeys.length);
+
+    if (allCardKeys.length > 0) {
+      console.log(
+        '前3个卡密:',
+        allCardKeys.slice(0, 3).map((ck) => ({
+          keyHash: ck.keyHash.substring(0, 16) + '...',
+          status: ck.status,
+          keyType: ck.keyType,
+        })),
+      );
+    }
+
     const storedCardKey = allCardKeys.find((ck) => ck.keyHash === hashedKey);
+    console.log(
+      '找到的卡密:',
+      storedCardKey
+        ? {
+            keyHash: storedCardKey.keyHash.substring(0, 16) + '...',
+            status: storedCardKey.status,
+            keyType: storedCardKey.keyType,
+          }
+        : null,
+    );
 
     if (!storedCardKey) {
+      console.log('=== validateCardKey 结束: 卡密不存在 ===');
       return {
         valid: false,
         error: '卡密无效或不存在',
@@ -72,6 +100,7 @@ export class CardKeyService {
     }
 
     if (storedCardKey.status === 'used') {
+      console.log('=== validateCardKey 结束: 卡密已被使用 ===');
       return {
         valid: false,
         error: '卡密已被使用',
@@ -79,6 +108,7 @@ export class CardKeyService {
     }
 
     if (storedCardKey.status === 'expired') {
+      console.log('=== validateCardKey 结束: 卡密已过期 ===');
       return {
         valid: false,
         error: '卡密已过期',
@@ -89,12 +119,14 @@ export class CardKeyService {
     if (storedCardKey.expiresAt < now) {
       // 自动标记为已过期
       await db.updateCardKey(storedCardKey.keyHash, { status: 'expired' });
+      console.log('=== validateCardKey 结束: 卡密已过期 ===');
       return {
         valid: false,
         error: '卡密已过期',
       };
     }
 
+    console.log('=== validateCardKey 结束: 验证成功 ===');
     return {
       valid: true,
       cardKey: storedCardKey,

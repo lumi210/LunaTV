@@ -26,19 +26,28 @@ export default function UserCardKeyBinding() {
     setLoading(true);
     setError('');
     try {
+      console.log('=== 开始获取卡密状态 ===');
       const res = await fetch('/api/user/cardkey');
+      console.log('响应状态:', res.status, res.statusText);
+
       if (!res.ok) {
         const errorData = await res.json();
+        console.error('获取卡密状态失败:', errorData);
         throw new Error(
           errorData.error ||
             errorData.details ||
             `获取卡密状态失败: ${res.status}`,
         );
       }
+
       const data = await res.json();
       console.log('获取卡密状态响应:', data);
+      console.log('hasCardKey:', data.hasCardKey);
+      console.log('cardKeyInfo:', JSON.stringify(data.cardKeyInfo, null, 2));
+      console.log('cardKeyInfo.plainKey:', data.cardKeyInfo?.plainKey);
       setHasCardKey(data.hasCardKey);
       setCardKeyInfo(data.cardKeyInfo || null);
+      console.log('=== 获取卡密状态完成 ===');
     } catch (err) {
       console.error('获取卡密状态失败:', err);
       setError(err instanceof Error ? err.message : '获取卡密状态失败');

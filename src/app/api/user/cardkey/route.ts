@@ -30,8 +30,49 @@ export async function GET(request: NextRequest) {
     console.log('username:', username);
 
     // 获取用户卡密信息
+    console.log('开始获取用户卡密信息...');
     const cardKeyInfo = await cardKeyService.getUserCardKey(username);
     console.log('cardKeyInfo:', JSON.stringify(cardKeyInfo, null, 2));
+
+    // 如果 cardKeyInfo 为空，打印详细调试信息
+    if (!cardKeyInfo) {
+      console.log('=== 卡密信息为空，开始调试 ===');
+      const { db } = await import('@/lib/db');
+
+      // 尝试获取用户基本信息
+      const userInfo = await db.getUserInfoV2(username);
+      console.log('用户基本信息:', userInfo);
+
+      // 尝试获取用户卡密详细信息
+      const userCardKeyInfo = await (db as any).storage.getUserCardKeyInfo(
+        username,
+      );
+      console.log('getUserCardKeyInfo 结果:', userCardKeyInfo);
+
+      // 尝试获取所有用户卡密记录
+      const userCardKeys = await (db as any).storage.getUserCardKeys(username);
+      console.log(
+        'getUserCardKeys 结果 (',
+        userCardKeys.length,
+        ' 条):',
+        userCardKeys,
+      );
+
+      // 获取所有卡密
+      const allCardKeys = await (db as any).storage.getAllCardKeys();
+      console.log('所有卡密数量:', allCardKeys.length);
+      if (allCardKeys.length > 0) {
+        console.log(
+          '前3个卡密:',
+          allCardKeys.slice(0, 3).map((ck) => ({
+            keyHash: ck.keyHash,
+            status: ck.status,
+            keyType: ck.keyType,
+          })),
+        );
+      }
+      console.log('=== 调试结束 ===');
+    }
 
     if (!cardKeyInfo) {
       console.log('用户没有绑定卡密');
