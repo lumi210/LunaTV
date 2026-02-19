@@ -674,9 +674,9 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
       {showCreateModal && (
         <div className='fixed inset-0 flex items-center justify-center z-50 p-4'>
           {/* 动态背景 */}
-          <div className='absolute inset-0 bg-gradient-to-br from-indigo-900/95 via-purple-900/90 to-pink-900/95 animate-gradient-x' />
+          <div className='absolute inset-0 bg-gradient-to-br from-indigo-900/95 via-purple-900/90 to-pink-900/95 animate-gradient-x pointer-events-none' />
           <div
-            className='absolute inset-0 bg-gradient-to-tr from-blue-900/80 via-cyan-900/80 to-teal-900/80 animate-gradient-y'
+            className='absolute inset-0 bg-gradient-to-tr from-blue-900/80 via-cyan-900/80 to-teal-900/80 animate-gradient-y pointer-events-none'
             style={{
               animationDuration: '3s',
               animationIterationCount: 'infinite',
@@ -706,7 +706,7 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
           {/* 弹窗容器 - 玻璃态效果 */}
           <div className='relative w-full max-w-2xl max-h-[85vh] flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/50 p-8'>
             {/* 光晕效果 */}
-            <div className='absolute -inset-4 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl animate-pulse-slow' />
+            <div className='absolute -inset-4 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl animate-pulse-slow pointer-events-none' />
 
             {/* 标题区域 */}
             <div className='relative mb-8'>
