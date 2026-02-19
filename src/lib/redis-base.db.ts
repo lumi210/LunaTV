@@ -1669,10 +1669,22 @@ export abstract class BaseRedisStorage implements IStorage {
   }
 
   async getUserCardKeyInfo(userName: string): Promise<UserCardKeyData | null> {
+    console.log('=== getUserCardKeyInfo 开始 ===');
+    console.log('userName:', userName);
+
     // 先尝试从 AdminConfig.Users 读取
     const config = await this.getAdminConfig();
     if (config) {
       const user = config.UserConfig.Users.find((u) => u.username === userName);
+      console.log(
+        'getUserCardKeyInfo - user from AdminConfig.Users:',
+        user
+          ? {
+              username: user.username,
+              hasCardKey: !!user.cardKey,
+            }
+          : null,
+      );
       if (user && user.cardKey) {
         console.log('getUserCardKeyInfo - 从 AdminConfig.Users 读取成功');
         return user.cardKey;
@@ -1688,7 +1700,14 @@ export abstract class BaseRedisStorage implements IStorage {
     );
     console.log('getUserCardKeyInfo - userInfo from hash:', userInfo);
 
-    if (!userInfo || !userInfo.cardKey) {
+    if (!userInfo) {
+      console.log('getUserCardKeyInfo - Hash 中没有用户信息');
+      return null;
+    }
+
+    console.log('getUserCardKeyInfo - userInfo.cardKey:', userInfo.cardKey);
+
+    if (!userInfo.cardKey) {
       console.log('getUserCardKeyInfo - Hash 中也没有 cardKey');
       return null;
     }
@@ -1696,9 +1715,11 @@ export abstract class BaseRedisStorage implements IStorage {
     try {
       const cardKeyInfo = JSON.parse(userInfo.cardKey as string);
       console.log('getUserCardKeyInfo - 解析成功:', cardKeyInfo);
+      console.log('=== getUserCardKeyInfo 结束 ===');
       return cardKeyInfo;
     } catch (error) {
       console.error('getUserCardKeyInfo - 解析 cardKey 失败:', error);
+      console.log('=== getUserCardKeyInfo 结束 ===');
       return null;
     }
   }
@@ -1709,11 +1730,14 @@ export abstract class BaseRedisStorage implements IStorage {
   ): Promise<void> {
     console.log('updateUserCardKeyInfo - userName:', userName, 'info:', info);
 
-    // 直接更新 Redis Hash 中的 cardKey
+    // 直接更新 Redis Hash 中的 cardKey（只更新 cardKey 字段，不影响其他字段）
+    console.log('updateUserCardKeyInfo - 准备更新 Hash 中的 cardKey 字段');
     await this.withRetry(() =>
-      this.client.hSet(this.userInfoKey(userName), {
-        cardKey: JSON.stringify(info),
-      }),
+      this.client.hSet(
+        this.userInfoKey(userName),
+        'cardKey',
+        JSON.stringify(info),
+      ),
     );
     console.log('updateUserCardKeyInfo - cardKey updated in Hash');
 
