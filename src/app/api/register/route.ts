@@ -353,12 +353,25 @@ export async function POST(req: NextRequest) {
       }
 
       // 注册成功后自动登录
+      // 获取用户卡密信息（用于返回给前端）
+      let userCardKeyInfo = null;
+      if (promotionCardKeyToBind) {
+        try {
+          const { cardKeyService } = await import('@/lib/cardkey');
+          userCardKeyInfo = await cardKeyService.getUserCardKey(username);
+          console.log('注册后获取到的卡密信息:', userCardKeyInfo);
+        } catch (error) {
+          console.error('注册后获取卡密信息失败:', error);
+        }
+      }
+
       const storageType =
         process.env.NEXT_PUBLIC_STORAGE_TYPE || 'localstorage';
       const response = NextResponse.json({
         ok: true,
         message: '注册成功，已自动登录',
         needDelay: storageType === 'upstash', // Upstash 需要延迟等待数据同步
+        cardKeyInfo: userCardKeyInfo,
       });
 
       const cookieValue = await generateAuthCookie(

@@ -110,7 +110,16 @@ function RegisterPageClient() {
       if (res.ok) {
         const data = await res.json();
         setError(null);
-        setSuccess('注册成功！正在跳转...');
+        console.log('注册响应数据:', data);
+
+        // 如果是推广模式且有卡密信息，显示卡密
+        if (data.cardKeyInfo && data.cardKeyInfo.plainKey) {
+          setSuccess(
+            `注册成功！您的卡密是：${data.cardKeyInfo.plainKey}，请妥善保存。正在跳转...`,
+          );
+        } else {
+          setSuccess('注册成功！正在跳转...');
+        }
 
         const delay = data.needDelay ? 2500 : 1500;
 
