@@ -13,7 +13,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CardKey } from '@/lib/types';
 
@@ -54,11 +54,13 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
   const [newKeyCount, setNewKeyCount] = useState(1);
   const [createdKeys, setCreatedKeys] = useState<string[]>([]);
   const [showCreatedKeys, setShowCreatedKeys] = useState(false);
+  const createdKeysModalRef = useRef<HTMLDivElement>(null);
 
-  // 当显示已创建卡密弹窗时，滚动到页面顶部
+  // 当显示已创建卡密弹窗时，滚动弹窗内部到顶部
   useEffect(() => {
-    if (showCreatedKeys) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (showCreatedKeys && createdKeysModalRef.current) {
+      createdKeysModalRef.current.scrollTop = 0;
+      window.scrollTo(0, 0);
     }
   }, [showCreatedKeys]);
 
@@ -864,8 +866,11 @@ export default function CardKeyManager({ onClose }: CardKeyManagerProps) {
 
       {/* 精美已创建卡密显示弹窗 */}
       {showCreatedKeys && (
-        <div className='fixed inset-0 bg-gray-50 dark:bg-gray-900 flex items-center justify-center z-50 p-4'>
-          <div className='relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 max-w-3xl w-full max-h-[90vh] flex flex-col border border-gray-200 dark:border-gray-700'>
+        <div
+          className='fixed inset-0 bg-gray-50 dark:bg-gray-900 flex items-center justify-center z-50 p-4 overflow-y-auto'
+          ref={createdKeysModalRef}
+        >
+          <div className='relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 max-w-3xl w-full max-h-[90vh] flex flex-col border border-gray-200 dark:border-gray-700 my-8'>
             {/* 装饰性光晕 */}
             <div className='absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 rounded-full blur-3xl opacity-30' />
             <div className='absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-br from-yellow-400 via-orange-400 to-amber-400 rounded-full blur-3xl opacity-30' />
