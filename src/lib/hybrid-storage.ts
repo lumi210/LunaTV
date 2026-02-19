@@ -381,6 +381,26 @@ export class HybridStorage implements IStorage {
       );
     });
 
+    // 同时更新 admin_config 中的 Users 列表（用于卡密绑定等功能）
+    const config = await this.getAdminConfig();
+    if (config) {
+      const userExists = config.UserConfig.Users.find(
+        (u) => u.username === userName,
+      );
+      if (!userExists) {
+        config.UserConfig.Users.push({
+          username: userName,
+          role: role,
+          banned: false,
+          tags: tags,
+          enabledApis: enabledApis,
+          oidcSub: oidcSub,
+          createdAt: Date.now(),
+        });
+        await this.setAdminConfig(config);
+      }
+    }
+
     if (cardKey) {
       try {
         const { cardKeyService } = await import('./cardkey');
