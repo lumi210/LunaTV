@@ -1842,22 +1842,35 @@ export abstract class BaseRedisStorage implements IStorage {
       return null;
     }
 
-    // 优先查找 used 状态且未过期的卡密
-    const now = Date.now();
-    const activeKey = userCardKeys.find(
-      (k) => k.status === 'used' && k.expiresAt > now,
+    // 打印所有 UserCardKey 记录
+    console.log(
+      '所有 UserCardKey 记录:',
+      userCardKeys.map((k) => ({
+        id: k.id,
+        keyHash: k.keyHash.substring(0, 16) + '...',
+        status: k.status,
+        type: k.type,
+        source: k.source,
+        expiresAt: new Date(k.expiresAt).toLocaleString('zh-CN'),
+      })),
     );
 
-    // 如果没有活跃卡密，查找 unused 状态的卡密
-    const targetKey =
-      activeKey || userCardKeys.find((k) => k.status === 'unused');
+    // 优先查找 used 状态且未过期的卡密（按 expiresAt 降序，取最新的）
+    const now = Date.now();
+    const usedKeys = userCardKeys
+      .filter((k) => k.status === 'used' && k.expiresAt > now)
+      .sort((a, b) => b.expiresAt - a.expiresAt);
+
+    console.log('有效的 used 卡密数量:', usedKeys.length);
+
+    const targetKey = usedKeys.length > 0 ? usedKeys[0] : null;
 
     if (!targetKey) {
       console.log('没有找到有效卡密，返回 null');
       return null;
     }
 
-    console.log('找到卡密:', targetKey);
+    console.log('找到卡密:', targetKey.id, targetKey.type, targetKey.source);
 
     // 直接根据 keyHash 获取卡密明文
     const cardKey = await this.getCardKey(targetKey.keyHash);
@@ -1877,6 +1890,13 @@ export abstract class BaseRedisStorage implements IStorage {
     );
     const isExpired = targetKey.expiresAt < now;
     const isExpiring = !isExpired && daysRemaining <= 30;
+
+    console.log(
+      'targetKey.expiresAt:',
+      targetKey.expiresAt,
+      new Date(targetKey.expiresAt).toLocaleString('zh-CN'),
+    );
+    console.log('计算出的剩余天数:', daysRemaining);
 
     const result = {
       plainKey: cardKey?.key,
