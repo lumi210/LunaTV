@@ -6,6 +6,7 @@ import {
   CheckCircle,
   Copy,
   Download,
+  KeyRound,
   Plus,
   RefreshCw,
   Settings,
