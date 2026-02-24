@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
 import { db } from '@/lib/db';
 
@@ -14,24 +16,52 @@ export interface AppVersion {
 }
 
 const APP_VERSION_KEY = 'app_version_info';
+const VERSION_FILE_PATH = path.join(process.cwd(), 'data', 'app_version.json');
+
+function ensureDataDir(): void {
+  const dataDir = path.dirname(VERSION_FILE_PATH);
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+}
 
 async function getAppVersionInfo(): Promise<AppVersion | null> {
+  try {
+    if (fs.existsSync(VERSION_FILE_PATH)) {
+      const content = fs.readFileSync(VERSION_FILE_PATH, 'utf-8');
+      const parsed = JSON.parse(content);
+      if (parsed) {
+        return parsed as AppVersion;
+      }
+    }
+  } catch (e) {
+    console.error('[AppUpdate] get version info from file failed:', e);
+  }
+
   try {
     const cached = await db.getCache(APP_VERSION_KEY);
     if (cached) {
       return cached as AppVersion;
     }
   } catch (e) {
-    console.error('[AppUpdate] get version info failed:', e);
+    console.error('[AppUpdate] get version info from cache failed:', e);
   }
   return null;
 }
 
 async function setAppVersionInfo(info: AppVersion): Promise<void> {
   try {
+    ensureDataDir();
+    fs.writeFileSync(VERSION_FILE_PATH, JSON.stringify(info, null, 2), 'utf-8');
+    console.log('[AppUpdate] version info saved to file:', VERSION_FILE_PATH);
+  } catch (e) {
+    console.error('[AppUpdate] set version info to file failed:', e);
+  }
+
+  try {
     await db.setCache(APP_VERSION_KEY, info);
   } catch (e) {
-    console.error('[AppUpdate] set version info failed:', e);
+    console.error('[AppUpdate] set version info to cache failed:', e);
   }
 }
 

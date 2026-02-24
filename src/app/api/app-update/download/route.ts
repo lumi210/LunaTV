@@ -1,8 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
 import { db } from '@/lib/db';
 
 const APP_WGT_PREFIX = 'app_wgt_';
+const DATA_DIR = path.join(process.cwd(), 'data');
+const VERSION_FILE_PATH = path.join(DATA_DIR, 'app_version.json');
+const WGT_DIR = path.join(DATA_DIR, 'wgt');
+
+interface VersionInfo {
+  version: string;
+  versionCode: number;
+  platform: string;
+}
+
+function getVersionInfo(): VersionInfo | null {
+  try {
+    if (fs.existsSync(VERSION_FILE_PATH)) {
+      const content = fs.readFileSync(VERSION_FILE_PATH, 'utf-8');
+      return JSON.parse(content);
+    }
+  } catch (e) {
+    console.error('[AppUpdate] get version info from file failed:', e);
+  }
+  return null;
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -17,6 +40,33 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const versionInfo = getVersionInfo();
+    
+    if (versionInfo && fs.existsSync(WGT_DIR)) {
+      const expectedFileName = `lunauinapp_${versionInfo.version}_${platform}.wgt`;
+      const wgtFilePath = path.join(WGT_DIR, expectedFileName);
+      
+      if (fs.existsSync(wgtFilePath)) {
+        const fileBuffer = fs.readFileSync(wgtFilePath);
+        
+        console.log('[AppUpdate] download WGT from file:', {
+          fileName: expectedFileName,
+          version: versionInfo.version,
+          platform: platform,
+          size: fileBuffer.length,
+        });
+
+        return new NextResponse(fileBuffer, {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            'Content-Disposition': `attachment; filename="${expectedFileName}"`,
+            'Content-Length': fileBuffer.length.toString(),
+          },
+        });
+      }
+    }
+
     const cacheKey = `${APP_WGT_PREFIX}${platform}_${versionCode}`;
     const wgtData = await db.getCache(cacheKey);
 
@@ -29,7 +79,7 @@ export async function GET(request: NextRequest) {
 
     const buffer = Buffer.from(wgtData.data, 'base64');
 
-    console.log('[AppUpdate] download WGT:', {
+    console.log('[AppUpdate] download WGT from cache:', {
       fileName: wgtData.fileName,
       version: wgtData.version,
       platform: wgtData.platform,
