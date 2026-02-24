@@ -19,7 +19,6 @@ async function getAppVersionInfo() {
 
 async function getWgtList() {
   try {
-    // 获取所有 wgt 文件列表
     const versionInfo = await getAppVersionInfo();
     if (!versionInfo) return [];
     
