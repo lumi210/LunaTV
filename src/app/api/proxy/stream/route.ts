@@ -98,8 +98,25 @@ export async function GET(request: Request) {
       'Content-Disposition',
     );
 
-    if (!headers.has('Content-Type')) {
-      headers.set('Content-Type', 'application/octet-stream');
+       if (!headers.has('Content-Type')) {
+      // 尝试根据 URL 或内容推断 Content-Type
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType !== 'application/octet-stream') {
+        headers.set('Content-Type', contentType);
+      } else if (decodedUrl.includes('.m3u8')) {
+        headers.set('Content-Type', 'application/vnd.apple.mpegurl');
+      } else if (decodedUrl.includes('.ts')) {
+        headers.set('Content-Type', 'video/mp2t');
+      } else if (decodedUrl.includes('.mpd')) {
+        headers.set('Content-Type', 'application/dash+xml');
+      } else if (decodedUrl.includes('.flv')) {
+        headers.set('Content-Type', 'video/x-flv');
+      } else {
+        // 默认使用 HLS，因为大多数直播流是 HLS 格式
+        headers.set('Content-Type', 'application/vnd.apple.mpegurl');
+      }
+      console.log(`[PROXY/STREAM] Set Content-Type: ${headers.get('Content-Type')}`);
+    }
     }
     if (!headers.has('Accept-Ranges')) {
       headers.set('Accept-Ranges', 'bytes');
