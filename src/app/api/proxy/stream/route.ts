@@ -49,9 +49,9 @@ export async function GET(request: Request) {
 
   const config = await getConfig();
   const liveSource = config.LiveConfig?.find((s: any) => s.key === source);
-  if (!liveSource) {
-    return NextResponse.json({ error: 'Source not found' }, { status: 404 });
-  }
+ // 如果找不到源配置，使用默认 UA 或传入的 UA 参数
+  const uaParam = searchParams.get('ua');
+  const ua = uaParam || liveSource?.ua || 'AptvPlayer/1.4.10';
 
   const ua = liveSource.ua || 'AptvPlayer/1.4.10';
   const decodedUrl = decodeURIComponent(url);
