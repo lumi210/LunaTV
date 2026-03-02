@@ -42,6 +42,7 @@ export async function GET(request: Request) {
   const url = searchParams.get('url');
   const source =
     searchParams.get('moontv-source') || searchParams.get('decotv-source');
+  const uaParam = searchParams.get('ua');
 
   if (!url) {
     return NextResponse.json({ error: 'Missing url' }, { status: 400 });
@@ -49,16 +50,19 @@ export async function GET(request: Request) {
 
   const config = await getConfig();
   const liveSource = config.LiveConfig?.find((s: any) => s.key === source);
- // 如果找不到源配置，使用默认 UA 或传入的 UA 参数
-  const uaParam = searchParams.get('ua');
+  
+  // 如果找不到源配置，使用默认 UA 或传入的 UA 参数
   const ua = uaParam || liveSource?.ua || 'AptvPlayer/1.4.10';
-
-  const ua = liveSource.ua || 'AptvPlayer/1.4.10';
   const decodedUrl = decodeURIComponent(url);
+
+  console.log(`[PROXY/STREAM] Source: ${source || 'unknown'}, UA: ${ua}, URL: ${decodedUrl.substring(0, 100)}...`);
 
   try {
     const requestHeaders = new Headers();
     requestHeaders.set('User-Agent', ua);
+    requestHeaders.set('Accept', '*/*');
+    requestHeaders.set('Accept-Encoding', 'gzip, deflate');
+    requestHeaders.set('Connection', 'keep-alive');
 
     const range = request.headers.get('range');
     if (range) {
@@ -72,8 +76,9 @@ export async function GET(request: Request) {
     });
 
     if (!response.ok && response.status !== 206) {
+      console.error(`[PROXY/STREAM] Upstream error: ${response.status} ${response.statusText}`);
       return NextResponse.json(
-        { error: 'Failed to fetch stream' },
+        { error: `Upstream error: ${response.status}`, url: decodedUrl.substring(0, 100) },
         { status: response.status || 500 },
       );
     }
@@ -104,9 +109,10 @@ export async function GET(request: Request) {
       status: response.status,
       headers,
     });
-  } catch {
+  } catch (error: any) {
+    console.error(`[PROXY/STREAM] Error:`, error);
     return NextResponse.json(
-      { error: 'Failed to fetch stream' },
+      { error: 'Failed to fetch stream', details: error.message },
       { status: 500 },
     );
   }
